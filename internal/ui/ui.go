@@ -33,7 +33,7 @@ type Server struct {
 	token string
 	host  string
 	mu    sync.Mutex
-	pull  map[string]any
+	setup map[string]any
 	run   runner
 }
 
@@ -48,7 +48,7 @@ func Start(ctx context.Context) (string, error) {
 	if _, err := rand.Read(secret); err != nil {
 		return "", err
 	}
-	s := &Server{token: hex.EncodeToString(secret), host: listener.Addr().String(), pull: map[string]any{}}
+	s := &Server{token: hex.EncodeToString(secret), host: listener.Addr().String(), setup: map[string]any{}}
 	server := &http.Server{Handler: s.routes(), ReadHeaderTimeout: 10 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -71,8 +71,7 @@ func (s *Server) routes() http.Handler {
 		"/api/pause":   s.pause,
 		"/api/unlink":  func(*http.Request) (any, error) { return nil, app.Unlink() },
 		"/api/startup": s.startup,
-		"/api/ollama":  s.ollama,
-		"/api/pull":    s.startPull,
+		"/api/setup":   s.startSetup,
 	}
 	for path, handler := range api {
 		handler := handler
@@ -134,7 +133,7 @@ func (s *Server) state(*http.Request) (any, error) {
 	st, _ := relay.ReadState()
 	memory := llm.MemoryGB()
 	s.mu.Lock()
-	pull := s.pull
+	setup := s.setup
 	s.mu.Unlock()
 	carrier, problem, revoked := s.carrier()
 	return map[string]any{
@@ -153,7 +152,8 @@ func (s *Server) state(*http.Request) (any, error) {
 		"startup":   service.Installed(),
 		"memory":    memory,
 		"recommend": llm.Recommend(memory),
-		"pull":      pull,
+		"lmstudio":  lmModel(memory),
+		"setup":     setup,
 	}, nil
 }
 
@@ -235,47 +235,59 @@ func (s *Server) startup(r *http.Request) (any, error) {
 	return nil, service.Uninstall()
 }
 
-func (s *Server) ollama(r *http.Request) (any, error) {
-	if r.Method != http.MethodPost {
-		return nil, errors.New("POST expected")
-	}
-	tool, err := llm.InstallOllama()
-	return map[string]string{"tool": tool, "page": llm.DownloadPage}, err
-}
-
-// startPull downloads a model in the background; the page follows the
-// progress through the state.
-func (s *Server) startPull(r *http.Request) (any, error) {
+// startSetup installs a local AI in the background - Ollama or LM Studio,
+// then a model - and tests it; the page follows the steps through the
+// state. One setup at a time.
+func (s *Server) startSetup(r *http.Request) (any, error) {
 	var in struct {
-		Model string `json:"model"`
+		Kind string `json:"kind"`
 	}
 	if err := decode(r, &in); err != nil {
 		return nil, err
 	}
-	if !llm.ValidModelName(in.Model) {
-		return nil, errors.New("invalid model name")
+	if in.Kind != llm.KindOllama && in.Kind != llm.KindLMStudio {
+		return nil, errors.New("unknown AI")
 	}
-	cfg, _ := config.Load()
-	base, err := llm.Normalize(cfg.AIURL)
-	if err != nil {
-		return nil, err
+	s.mu.Lock()
+	if running, _ := s.setup["running"].(bool); running {
+		s.mu.Unlock()
+		return nil, errors.New("a setup is already running")
 	}
-	s.setPull(map[string]any{"model": in.Model, "percent": 0})
+	s.setup = map[string]any{"kind": in.Kind, "running": true, "key": "ui.working", "args": []any{}, "percent": -1}
+	s.mu.Unlock()
+
 	go func() {
-		err := llm.Pull(context.Background(), base, in.Model, func(p int) {
-			s.setPull(map[string]any{"model": in.Model, "percent": p})
-		})
-		done := map[string]any{"model": in.Model, "percent": 100, "done": true}
-		if err != nil {
-			done = map[string]any{"model": in.Model, "error": err.Error()}
+		ctx := context.Background()
+		report := func(p llm.Progress) {
+			s.mu.Lock()
+			s.setup = map[string]any{"kind": in.Kind, "running": true, "key": p.Key, "args": p.Args, "percent": p.Percent}
+			s.mu.Unlock()
 		}
-		s.setPull(done)
+		address, err := llm.Setup(ctx, in.Kind, llm.MemoryGB(), report)
+		var models []llm.Model
+		software := ""
+		if err == nil {
+			report(llm.Progress{Key: "setup.test", Args: []any{}, Percent: -1})
+			// Saved like a typed address: the relay starts on it.
+			software, models, err = app.SetAI(ctx, address)
+		}
+		done := map[string]any{"kind": in.Kind, "running": false, "done": err == nil, "address": address, "models": models, "software": software}
+		switch {
+		case errors.Is(err, llm.ErrNeedsZstd):
+			done["key"], done["args"] = "setup.zstd", []any{}
+		case err != nil:
+			done["key"], done["args"] = "err.generic", []any{err.Error()}
+		default:
+			done["key"], done["args"] = "setup.done", []any{address}
+		}
+		s.mu.Lock()
+		s.setup = done
+		s.mu.Unlock()
 	}()
 	return nil, nil
 }
 
-func (s *Server) setPull(v map[string]any) {
-	s.mu.Lock()
-	s.pull = v
-	s.mu.Unlock()
+func lmModel(memory int) string {
+	name, _ := llm.RecommendLMStudio(memory)
+	return name
 }

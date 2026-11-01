@@ -93,6 +93,12 @@ details{border:1px dashed var(--line);border-radius:10px;padding:12px 14px}
 details summary{cursor:pointer;font-size:14px;font-weight:600}
 details[open] summary{margin-bottom:10px}
 details .inner{display:flex;flex-direction:column;gap:10px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.choice{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.choice .btn{margin-top:auto}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.bar.busy div{width:35%!important;animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{margin-left:-35%}100%{margin-left:100%}}
 .bar{height:6px;border-radius:999px;background:var(--soft);overflow:hidden}
 .bar div{height:100%;width:0;background:var(--accent);transition:width .3s}
 .status{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--soft)}
@@ -175,13 +181,24 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
       <details id="install">
         <summary data-t="ui.ai.none"></summary>
         <div class="inner">
-          <p class="hint" data-t="ui.install.intro"></p>
-          <div class="row"><button class="btn ghost" type="button" id="ollama" data-t="ui.install.ollama_get"></button></div>
-          <p class="msg" id="ollama-msg" role="status"></p>
-          <div class="field"><label for="model" data-t="ui.install.model"></label><span class="hint" id="memory"></span>
-            <div class="row"><input id="model" type="text" autocomplete="off"><button class="btn ghost" type="button" id="pull" data-t="ui.install.download"></button></div></div>
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar"><div></div></div>
-          <p class="msg" id="pull-msg" role="status"></p>
+          <p class="hint" data-t="ui.setup.intro"></p>
+          <p class="hint" id="memory"></p>
+          <div class="choices">
+            <div class="choice">
+              <strong>Ollama</strong>
+              <p class="hint" data-t="ui.setup.ollama"></p>
+              <p class="hint mono" id="ollama-model"></p>
+              <button class="btn primary" type="button" data-setup="ollama" data-t="ui.setup.go"></button>
+            </div>
+            <div class="choice">
+              <strong>LM Studio</strong>
+              <p class="hint" data-t="ui.setup.lmstudio"></p>
+              <p class="hint mono" id="lmstudio-model"></p>
+              <button class="btn primary" type="button" data-setup="lmstudio" data-t="ui.setup.go"></button>
+            </div>
+          </div>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar" hidden><div></div></div>
+          <p class="msg" id="setup-msg" role="status"></p>
         </div>
       </details>
     </form>
@@ -231,6 +248,9 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
   var tested = null;
   var testing = false;
   var autoTested = false;
+  var shownSetup = '';
+  // What answered at the address, from the last test or setup here.
+  var software = '';
   // A card reopened with Change stays open until its step is done again.
   var opened = {};
 
@@ -288,8 +308,9 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
     $('version').textContent = fmt('ui.version', state.version);
     if (!$('shop').value && document.activeElement !== $('shop')) { $('shop').value = state.shop.url || ''; }
     if (!$('ai').value && document.activeElement !== $('ai')) { $('ai').value = state.ai || ''; }
-    if (!$('model').value) { $('model').value = state.recommend; }
-    $('memory').textContent = state.memory ? fmt('ui.install.memory', state.memory, state.recommend) : '';
+    $('memory').textContent = state.memory ? fmt('ui.setup.memory', state.memory) : '';
+    $('ollama-model').textContent = state.recommend;
+    $('lmstudio-model').textContent = state.lmstudio;
     $('revoked').hidden = !state.revoked || state.shop.linked;
 
     var linked = !!state.shop.linked;
@@ -300,7 +321,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
     setCard('c-shop', linked);
     setCard('c-ai', ready);
     $('shop-sum').textContent = linked ? fmt('ui.shop.summary', state.shop.name ? state.shop.name + ' · ' + state.shop.url : state.shop.url) : '';
-    $('ai-sum').textContent = ready ? fmt('ui.ai.summary', (state.relay && state.relay.software) || 'AI', state.ai, toolCount()) : '';
+    $('ai-sum').textContent = ready ? fmt('ui.ai.summary', software || (state.relay && state.relay.software) || 'AI', state.ai, toolCount()) : '';
     if (!testing) {
       drawModels();
       $('ai-btn').textContent = t(models().length ? 'ui.ai.retry' : 'ui.ai.test');
@@ -334,13 +355,24 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
     $('unlink').disabled = !linked;
     $('startup').checked = !!state.startup;
 
-    var pull = state.pull || {};
-    if (pull.model) {
-      $('bar').firstElementChild.style.width = (pull.percent || 0) + '%';
-      $('bar').setAttribute('aria-valuenow', String(pull.percent || 0));
-      if (pull.error) { say('pull-msg', fmt('err.generic', pull.error), 'bad'); }
-      else if (pull.done) { say('pull-msg', fmt('llm.pulled', pull.model), 'ok'); }
-      else { say('pull-msg', fmt('llm.progress', pull.model, pull.percent || 0), 'info'); }
+    // The setup runs in the relay, which may outlive this tab: the page
+    // only draws where it stands.
+    var setup = state.setup || {};
+    var installing = !!setup.running;
+    document.querySelectorAll('[data-setup]').forEach(function (b) { b.disabled = installing; });
+    $('bar').hidden = !setup.key;
+    $('bar').classList.toggle('busy', installing && setup.percent < 0);
+    $('bar').firstElementChild.style.width = (setup.done ? 100 : Math.max(0, setup.percent || 0)) + '%';
+    if (setup.key) {
+      say('setup-msg', fmt.apply(null, [setup.key].concat(setup.args || [])), setup.done ? 'ok' : (installing ? 'info' : 'bad'));
+      if (installing) { $('install').open = true; }
+    }
+    if (setup.done && setup.address && setup.address !== shownSetup) {
+      // Done: the address and its tested models, as after a Test.
+      shownSetup = setup.address;
+      $('ai').value = setup.address;
+      tested = setup.models || [];
+      software = setup.software || '';
     }
 
     // The first check runs on its own: an address already saved is tested
@@ -373,6 +405,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
     api('/api/ai', { address: $('ai').value.trim() })
       .then(function (r) {
         tested = r.models;
+        software = r.software;
         if (toolCount()) {
           say('ai-msg', r.software + ' - ' + fmt('ui.ai.found', r.models.length), 'ok');
         } else {
@@ -407,11 +440,12 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
   $('lang').addEventListener('change', function () { api('/api/lang', { lang: $('lang').value }).then(refresh); });
   $('pair-form').addEventListener('submit', function (e) { e.preventDefault(); pair(); });
   $('ai-form').addEventListener('submit', function (e) { e.preventDefault(); testAI(); });
-  $('ollama').addEventListener('click', function () {
-    api('/api/ollama', {}).then(function (r) { say('ollama-msg', r.tool ? fmt('ollama.installing', r.tool) : fmt('ollama.opened', r.page), 'ok'); })
-      .catch(function (err) { say('ollama-msg', fmt('err.generic', err.message), 'bad'); });
+  document.querySelectorAll('[data-setup]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      api('/api/setup', { kind: b.getAttribute('data-setup') }).then(refresh)
+        .catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); });
+    });
   });
-  $('pull').addEventListener('click', function () { api('/api/pull', { model: $('model').value }).then(refresh).catch(function (err) { say('pull-msg', fmt('err.generic', err.message), 'bad'); }); });
   $('pause').addEventListener('click', function () { api('/api/pause', { paused: !state.paused }).then(refresh); });
   $('startup').addEventListener('change', function () { api('/api/startup', { on: $('startup').checked }).then(refresh).catch(function (err) { alert(err.message); refresh(); }); });
   $('unlink').addEventListener('click', function () { api('/api/unlink', {}).then(function () { opened = {}; tested = null; return refresh(); }); });

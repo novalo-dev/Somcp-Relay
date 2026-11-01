@@ -33,8 +33,10 @@ browser, with a progress bar over three steps:
 2. **Local AI** - type the address where your AI runs (`http://localhost:11434`
    for Ollama, `http://localhost:1234` for LM Studio, or your own port) and
    click **Test**. Only the models that can call tools are offered in the shop.
-   No local AI yet? The same screen installs Ollama from its official site and
-   downloads a model suited to your computer's memory.
+   No local AI yet? Pick Ollama or LM Studio and click **Install everything**:
+   the relay downloads it from its official site, installs it for your account
+   only, starts it, downloads a model suited to your computer's memory and
+   tests it.
 3. **Relay** - it starts on its own and carries the shop's requests while the
    interface is open. Turn on **Start with the computer** to keep it running
    after you close it; pause it or unlink the shop from the same card.
@@ -58,6 +60,7 @@ somcp-relay status                 show the shop, the AI and the relay
 somcp-relay llm list               list the models of the local AI
 somcp-relay llm test [model]       check that a model can call tools
 somcp-relay llm install <model>    download a model into Ollama
+somcp-relay llm setup ollama|lmstudio   install a local AI and a model, test them
 somcp-relay version | help
 ```
 

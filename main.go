@@ -151,6 +151,31 @@ func status() {
 }
 
 func llmCommand(ctx context.Context, args []string) error {
+	// setup needs no AI yet: it is how one gets installed.
+	if len(args) >= 1 && args[0] == "setup" {
+		if len(args) != 2 {
+			return usage("somcp-relay llm setup ollama|lmstudio")
+		}
+		address, err := llm.Setup(ctx, args[1], llm.MemoryGB(), func(p llm.Progress) {
+			fmt.Printf("\r%s", i18n.T(p.Key, p.Args...))
+		})
+		fmt.Println()
+		if errors.Is(err, llm.ErrNeedsZstd) {
+			return errors.New(i18n.T("setup.zstd"))
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(i18n.T("setup.test"))
+		software, models, err := app.SetAI(ctx, address)
+		if err != nil {
+			return errors.New(i18n.T("ai.fail", address, err))
+		}
+		fmt.Println(i18n.T("ai.ok", software, len(models)))
+		printModels(models)
+		fmt.Println(i18n.T("setup.done", address))
+		return nil
+	}
 	cfg, _ := config.Load()
 	if cfg.AIURL == "" {
 		return errors.New(i18n.T("err.no_ai"))

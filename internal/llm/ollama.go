@@ -154,31 +154,6 @@ func MemoryGB() int {
 	return int((bytesTotal + (1 << 29)) >> 30)
 }
 
-// InstallOllama installs Ollama with the system's package manager when
-// there is one (winget, Homebrew), and otherwise opens the official
-// download page: the relay never runs an installer fetched from elsewhere.
-// It returns the tool used, or "" when the page was opened.
-func InstallOllama() (string, error) {
-	switch runtime.GOOS {
-	case "windows":
-		if _, err := exec.LookPath("winget"); err == nil {
-			return "winget", run("winget", "install", "--id", "Ollama.Ollama", "-e", "--accept-source-agreements", "--accept-package-agreements")
-		}
-	case "darwin":
-		if _, err := exec.LookPath("brew"); err == nil {
-			return "Homebrew", run("brew", "install", "ollama")
-		}
-	}
-	return "", OpenBrowser(DownloadPage)
-}
-
-func run(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 // OpenBrowser opens an http(s) address in the default browser.
 func OpenBrowser(address string) error {
 	u, err := url.Parse(address)

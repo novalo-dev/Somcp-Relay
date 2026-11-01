@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.1 - 2026-11-02
+
+### Added
+
+**A local AI installed in one click.** Under **No local AI yet?**, pick
+**Ollama** or **LM Studio** and click **Install everything**: the relay
+downloads it from its official site, installs it for your account only -
+no administrator rights -, starts it, downloads a model suited to your
+computer's memory, tests it with the shop's tools and keeps its address. A
+progress bar follows each step, and there is nothing else to type. The same
+setup runs from the command line with `somcp-relay llm setup ollama` or
+`somcp-relay llm setup lmstudio`. On Linux, Ollama needs the zstd tool to
+unpack; the relay says so and suggests LM Studio when it is missing.
+
+### Fixed
+
+**Downloading a model before any AI was set up failed** with "empty
+address": the download looked for the address of an AI that was not there
+yet. It is now part of the one-click install, which knows the address.
+
 ## 0.1.0 - 2026-11-02
 
 ### Added
