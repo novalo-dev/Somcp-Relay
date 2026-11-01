@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>somcp-relay</title>
+<style>
+:root{--ink:#1D1F23;--muted:#5B616B;--line:#E3E6EB;--soft:#F6F7F9;--accent:#2F5BEA;--accent-ink:#1E3FB0;--accent-soft:#EEF2FD;--ok:#0F766E;--ok-soft:#E6F4F1;--bad:#9B2C1F;--bad-soft:#FDECEA}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--soft)}
+.app{display:flex;min-height:100vh;flex-wrap:wrap}
+nav{width:240px;flex:0 0 240px;background:#fff;border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 20px;font-weight:700;font-size:16px}
+.step{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;border:0;background:none;color:var(--muted);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.step[aria-current="page"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.dot{width:22px;height:22px;border-radius:50%;border:1px solid #C9CED6;font-size:12px;display:flex;align-items:center;justify-content:center}
+.step[aria-current="page"] .dot{background:var(--accent);border-color:var(--accent);color:#fff}
+.dot.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.grow{flex-grow:1}
+.small{font-size:12px;color:var(--muted)}
+main{flex:999 1 560px;min-width:0;padding:40px 48px;display:flex;flex-direction:column;gap:20px}
+h1{margin:0;font-size:24px;letter-spacing:-.01em}
+h2{margin:0 0 8px;font-size:14px}
+p{margin:0;line-height:1.5}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:14px;max-width:620px}
+label{font-size:13px;font-weight:600}
+input,select{height:44px;padding:0 12px;border:1px solid #C9CED6;border-radius:10px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row input{flex:1 1 240px}
+button.primary,button.secondary,button.danger{height:44px;padding:0 18px;border-radius:10px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+button.primary{border:0;background:var(--accent);color:#fff}
+button.secondary{border:1px solid var(--accent);background:#fff;color:var(--accent)}
+button.danger{border:1px solid #F1C6BF;background:#fff;color:var(--bad)}
+button:disabled{opacity:.5;cursor:default}
+.msg{font-size:13px}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.models{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.models li{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;background:var(--soft)}
+.badge{padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.badge.ok{background:var(--ok-soft);color:#0F5F58}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.none{background:#EEF0F3;color:var(--muted)}
+.bar{height:8px;border-radius:999px;background:#EEF0F3;overflow:hidden}.bar>div{height:8px;background:var(--accent);width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:900px}
+.kv{display:flex;justify-content:space-between;gap:16px;min-height:36px;align-items:center;border-bottom:1px solid #EEF0F3;font-size:14px}
+.kv span:first-child{font-size:13px;color:var(--muted)}
+code{font-size:12px;background:#EEF0F3;padding:2px 6px;border-radius:4px}
+[hidden]{display:none!important}
+@media (max-width:700px){nav{width:100%;flex-basis:100%;border-right:0;border-bottom:1px solid var(--line)}main{padding:24px 16px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav>
+    <div class="brand"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2F5BEA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h4l3-7 2 14 3-7h4"></path></svg>somcp-relay</div>
+    <button class="step" data-view="shop"><span class="dot" data-dot="shop">1</span><span data-t="ui.step.shop"></span></button>
+    <button class="step" data-view="ai"><span class="dot" data-dot="ai">2</span><span data-t="ui.step.ai"></span></button>
+    <button class="step" data-view="status"><span class="dot" data-dot="status">3</span><span data-t="ui.step.status"></span></button>
+    <span class="grow"></span>
+    <label for="lang" class="small" data-t="ui.lang"></label>
+    <select id="lang"><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select>
+    <span class="small" id="version"></span>
+  </nav>
+
+  <main id="view-shop">
+    <h1 data-t="ui.shop.title"></h1>
+    <p class="small" data-t="ui.shop.intro"></p>
+    <form class="card" id="pair-form">
+      <label for="shop" data-t="ui.shop.address"></label>
+      <input id="shop" type="url" placeholder="https://" required>
+      <label for="code" data-t="ui.shop.code"></label>
+      <input id="code" type="text" autocomplete="off" required>
+      <span class="small" data-t="ui.shop.code_hint"></span>
+      <div class="row"><button class="primary" type="submit" data-t="ui.shop.link"></button><span class="msg" id="pair-msg" role="status"></span></div>
+    </form>
+    <p class="small" data-t="ui.shop.note"></p>
+  </main>
+
+  <main id="view-ai" hidden>
+    <h1 data-t="ui.ai.title"></h1>
+    <p class="small" data-t="ui.ai.intro"></p>
+    <form class="card" id="ai-form">
+      <label for="ai" data-t="ui.ai.address"></label>
+      <div class="row"><input id="ai" type="text" placeholder="http://localhost:11434" required><button class="secondary" type="submit" data-t="ui.ai.test"></button></div>
+      <span class="small" data-t="ui.ai.examples"></span>
+      <span class="msg" id="ai-msg" role="status"></span>
+      <ul class="models" id="models"></ul>
+      <span class="small" data-t="ui.ai.only_tools"></span>
+    </form>
+    <section class="card">
+      <h2 data-t="ui.install.title"></h2>
+      <p class="small" data-t="ui.install.intro"></p>
+      <div class="row"><button class="secondary" type="button" id="ollama" data-t="ui.install.ollama_get"></button><span class="msg" id="ollama-msg" role="status"></span></div>
+      <label for="model" data-t="ui.install.model"></label>
+      <span class="small" id="memory"></span>
+      <div class="row"><input id="model" type="text"><button class="secondary" type="button" id="pull" data-t="ui.install.download"></button></div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar"><div></div></div>
+      <span class="msg" id="pull-msg" role="status"></span>
+    </section>
+  </main>
+
+  <main id="view-status" hidden>
+    <div class="row"><h1 id="status-title"></h1><span class="grow"></span><button class="secondary" type="button" id="pause"></button></div>
+    <div class="grid">
+      <section class="card"><h2 data-t="ui.step.shop"></h2>
+        <div class="kv"><span data-t="ui.status.linked_to"></span><span id="s-shop"></span></div>
+        <div class="kv"><span data-t="ui.status.last"></span><span id="s-last"></span></div>
+      </section>
+      <section class="card"><h2 data-t="ui.step.ai"></h2>
+        <div class="kv"><span data-t="ui.status.address"></span><span id="s-ai"></span></div>
+        <div class="kv"><span data-t="ui.status.models"></span><span id="s-models"></span></div>
+      </section>
+    </div>
+    <section class="card">
+      <div class="row"><label for="startup" class="grow" data-t="ui.status.startup"></label><input id="startup" type="checkbox" style="width:22px;height:22px"></div>
+      <div class="row"><button class="danger" type="button" id="unlink" data-t="ui.status.unlink"></button></div>
+    </section>
+    <p class="small" data-t="ui.status.note"></p>
+  </main>
+</div>
+<script>
+(function () {
+  'use strict';
+  // The token arrives in the address fragment, which never reaches a
+  // server log, and is kept for this tab only.
+  var token = location.hash.slice(1) || sessionStorage.getItem('relay-token') || '';
+  if (location.hash) { sessionStorage.setItem('relay-token', token); history.replaceState(null, '', '/'); }
+  var texts = {};
+  var state = null;
+  var view = 'shop';
+
+  function t(key) { return texts[key] || key; }
+  function fmt(key) { var args = Array.prototype.slice.call(arguments, 1); var i = 0; return t(key).replace(/%[sd]/g, function () { return String(args[i++]); }); }
+  function $(id) { return document.getElementById(id); }
+
+  function api(path, body) {
+    return fetch(path, {
+      method: body === undefined ? 'GET' : 'POST',
+      headers: { 'X-Relay-Token': token, 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    }).then(function (r) { return r.json().then(function (j) { if (!r.ok) { throw new Error(j && j.error || r.status); } return j; }); });
+  }
+
+  function say(id, text, ok) { var el = $(id); el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'bad'); }
+
+  function show(name) {
+    view = name;
+    ['shop', 'ai', 'status'].forEach(function (v) {
+      $('view-' + v).hidden = v !== name;
+      document.querySelector('[data-view="' + v + '"]').setAttribute('aria-current', v === name ? 'page' : 'false');
+    });
+  }
+
+  function drawModels(models) {
+    var list = $('models');
+    list.textContent = '';
+    (models || []).forEach(function (m) {
+      var li = document.createElement('li');
+      var name = document.createElement('span'); name.className = 'grow'; name.textContent = m.id;
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + (m.tools === true ? 'ok' : (m.tools === false ? 'bad' : 'none'));
+      badge.textContent = t(m.tools === true ? 'llm.tools_ok' : (m.tools === false ? 'llm.tools_no' : 'llm.tools_untested'));
+      li.appendChild(name); li.appendChild(badge); list.appendChild(li);
+    });
+  }
+
+  function draw() {
+    texts = state.texts;
+    document.documentElement.lang = state.lang;
+    document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = t(el.getAttribute('data-t')); });
+    $('lang').value = state.lang;
+    $('version').textContent = fmt('ui.version', state.version);
+    if (!$('shop').value) { $('shop').value = state.shop.url || ''; }
+    if (!$('ai').value) { $('ai').value = state.ai || ''; }
+    $('memory').textContent = state.memory ? fmt('ui.install.memory', state.memory, state.recommend) : '';
+    if (!$('model').value) { $('model').value = state.recommend; }
+    // The models the running relay found, until a new test replaces them.
+    if (!$('models').childNodes.length && state.relay && state.relay.models) { drawModels(state.relay.models); }
+    $('s-shop').textContent = state.shop.name || state.shop.url || t('status.none');
+    $('s-last').textContent = state.relay && state.relay.last_contact && state.relay.last_contact.indexOf('0001') !== 0 ? new Date(state.relay.last_contact).toLocaleString(state.lang) : t('ui.never');
+    $('s-ai').textContent = state.ai || t('status.none');
+    $('s-models').textContent = String((state.relay && state.relay.models || []).filter(function (m) { return m.tools; }).length);
+    $('status-title').textContent = t(state.running && !state.paused ? 'ui.status.on' : 'ui.status.off');
+    $('pause').textContent = t(state.paused ? 'ui.status.resume' : 'ui.status.pause');
+    $('startup').checked = !!state.startup;
+    var dots = { shop: state.shop.linked, ai: !!state.ai, status: state.running };
+    Object.keys(dots).forEach(function (k) { var d = document.querySelector('[data-dot="' + k + '"]'); d.classList.toggle('done', !!dots[k] && view !== k); });
+    var pull = state.pull || {};
+    if (pull.model) {
+      $('bar').firstElementChild.style.width = (pull.percent || 0) + '%';
+      $('bar').setAttribute('aria-valuenow', String(pull.percent || 0));
+      if (pull.error) { say('pull-msg', fmt('err.generic', pull.error), false); }
+      else if (pull.done) { say('pull-msg', fmt('llm.pulled', pull.model), true); }
+      else { say('pull-msg', fmt('llm.progress', pull.model, pull.percent || 0), true); }
+    }
+  }
+
+  function refresh() { return api('/api/state').then(function (s) { state = s; draw(); }); }
+
+  document.querySelectorAll('[data-view]').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-view')); draw(); }); });
+  $('lang').addEventListener('change', function () { api('/api/lang', { lang: $('lang').value }).then(refresh); });
+  $('pair-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    api('/api/pair', { shop: $('shop').value, code: $('code').value })
+      .then(function (info) { say('pair-msg', fmt('ui.shop.linked', info.name + ' (PrestaShop ' + info.version + ')'), true); $('code').value = ''; return refresh(); })
+      .catch(function (err) { say('pair-msg', fmt('err.generic', err.message), false); });
+  });
+  $('ai-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    say('ai-msg', t('ui.working'), true);
+    api('/api/ai', { address: $('ai').value })
+      .then(function (r) { say('ai-msg', r.software + ' - ' + fmt('ui.ai.found', r.models.length), true); drawModels(r.models); return refresh(); })
+      .catch(function (err) { say('ai-msg', fmt('ai.fail', $('ai').value, err.message), false); drawModels([]); });
+  });
+  $('ollama').addEventListener('click', function () {
+    api('/api/ollama', {}).then(function (r) { say('ollama-msg', r.tool ? fmt('ollama.installing', r.tool) : fmt('ollama.opened', r.page), true); })
+      .catch(function (err) { say('ollama-msg', fmt('err.generic', err.message), false); });
+  });
+  $('pull').addEventListener('click', function () { api('/api/pull', { model: $('model').value }).then(refresh).catch(function (err) { say('pull-msg', fmt('err.generic', err.message), false); }); });
+  $('pause').addEventListener('click', function () { api('/api/pause', { paused: !state.paused }).then(refresh); });
+  $('startup').addEventListener('change', function () { api('/api/startup', { on: $('startup').checked }).then(refresh).catch(function (err) { alert(err.message); refresh(); }); });
+  $('unlink').addEventListener('click', function () { api('/api/unlink', {}).then(refresh); });
+
+  show('shop');
+  refresh().then(function () { if (state.shop.linked) { show(state.ai ? 'status' : 'ai'); draw(); } });
+  setInterval(refresh, 3000);
+})();
+</script>
+</body>
+</html>
