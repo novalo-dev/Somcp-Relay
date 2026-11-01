@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/novalo-dev/somcp-relay/internal/config"
@@ -93,6 +94,19 @@ func Software(ctx context.Context, base string) string {
 	return "OpenAI-compatible"
 }
 
+// discovered keeps the last tool test of each AI address for a while: the
+// interface tests the address when it is typed, and the relay it then
+// starts would otherwise run every test again - each one a real answer of
+// the model, slow on a small computer.
+var discovered = struct {
+	sync.Mutex
+	at     map[string]time.Time
+	models map[string][]llm.Model
+}{at: map[string]time.Time{}, models: map[string][]llm.Model{}}
+
+// discoveryLife is how long a tool test is trusted.
+const discoveryLife = 10 * time.Minute
+
 // Discover lists the AI's models and runs the tool test on the first
 // MaxTested of them.
 func Discover(ctx context.Context, ai *llm.Client) ([]llm.Model, error) {
@@ -110,7 +124,24 @@ func Discover(ctx context.Context, ai *llm.Client) ([]llm.Model, error) {
 		}
 		models[i].Tools = &ok
 	}
+	discovered.Lock()
+	discovered.at[ai.Base()] = time.Now()
+	discovered.models[ai.Base()] = models
+	discovered.Unlock()
 	return models, nil
+}
+
+// recentDiscovery returns the models tested at this address less than
+// discoveryLife ago, or runs the test.
+func recentDiscovery(ctx context.Context, ai *llm.Client) ([]llm.Model, error) {
+	discovered.Lock()
+	at, ok := discovered.at[ai.Base()]
+	models := discovered.models[ai.Base()]
+	discovered.Unlock()
+	if ok && time.Since(at) < discoveryLife {
+		return models, nil
+	}
+	return Discover(ctx, ai)
 }
 
 // Run carries jobs until the context ends or the shop revokes the relay.
@@ -135,7 +166,7 @@ func Run(ctx context.Context, log Logger) error {
 
 	state := State{PID: os.Getpid(), Shop: cfg.ShopName, AI: ai.Base()}
 	state.Software = Software(ctx, ai.Base())
-	state.Models, err = Discover(ctx, ai)
+	state.Models, err = recentDiscovery(ctx, ai)
 	if err != nil {
 		return fmt.Errorf("local AI: %w", err)
 	}

@@ -21,18 +21,26 @@ The details are in [PROTOCOL.md](PROTOCOL.md).
 
 ## Install
 
-Download the file for your system from the releases, then run it. With no
-command it opens its interface in your browser:
+Download the file for your system from the
+[latest release](https://github.com/novalo-dev/Somcp-Relay/releases/latest) -
+`windows-x64.exe`, `macos-apple-silicon`, `macos-intel`, `linux-x64` or the
+`arm64` builds - then run it. With no command it opens its interface in your
+browser, with a progress bar over three steps:
 
-1. **Shop** - type your shop's address and the pairing code shown in the back
-   office under **Built-in assistant > Add a local assistant**.
+1. **Shop** - in the back office, open **Built-in assistant > Add a local
+   assistant** and paste the command it shows into either field: the address
+   and the code fill in and the shop is linked.
 2. **Local AI** - type the address where your AI runs (`http://localhost:11434`
    for Ollama, `http://localhost:1234` for LM Studio, or your own port) and
    click **Test**. Only the models that can call tools are offered in the shop.
    No local AI yet? The same screen installs Ollama from its official site and
    downloads a model suited to your computer's memory.
-3. **Status** - pause the relay, make it start with your computer, or unlink
-   the shop.
+3. **Relay** - it starts on its own and carries the shop's requests while the
+   interface is open. Turn on **Start with the computer** to keep it running
+   after you close it; pause it or unlink the shop from the same card.
+
+Releases are published by `.github/workflows/release.yml` when the newest
+section of the CHANGELOG names a new version.
 
 The interface speaks English, French, Spanish and German; it follows your
 system's language when it is one of those, English otherwise.

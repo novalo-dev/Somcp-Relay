@@ -34,6 +34,7 @@ type Server struct {
 	host  string
 	mu    sync.Mutex
 	pull  map[string]any
+	run   runner
 }
 
 // Start listens on a free port of 127.0.0.1 and returns the address to
@@ -54,6 +55,7 @@ func Start(ctx context.Context) (string, error) {
 		_ = server.Close()
 	}()
 	go func() { _ = server.Serve(listener) }()
+	go s.supervise(ctx)
 	return "http://" + s.host + "/#" + s.token, nil
 }
 
@@ -134,7 +136,11 @@ func (s *Server) state(*http.Request) (any, error) {
 	s.mu.Lock()
 	pull := s.pull
 	s.mu.Unlock()
+	carrier, problem, revoked := s.carrier()
 	return map[string]any{
+		"carrier":   carrier,
+		"problem":   problem,
+		"revoked":   revoked,
 		"version":   app.Version,
 		"lang":      i18n.Current(),
 		"languages": i18n.Languages,
