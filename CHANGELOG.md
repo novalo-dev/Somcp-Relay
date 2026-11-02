@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+**Licence and sponsor.** The relay is published under the Academic Free
+License 3.0, like the O'So MCP Server module, and the repository has its
+Sponsor button. The README links to the module and shows its badges.
+
 ## 0.2.4 - 2026-11-02
 
 ### Added

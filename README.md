@@ -1,9 +1,20 @@
 # O'So AI Relay
 
-For PrestaShop shops using the **O'So MCP Server** module: O'So AI Relay links
-the shop's built-in assistant to an AI running on your own computer (Ollama,
-LM Studio or any OpenAI-compatible software). Nothing to open on your network,
-no API key to pay for.
+[![PrestaShop](.github/badges/prestashop.svg)](https://github.com/novalo-dev/Prestashop-MCP-Server)
+[![Go](.github/badges/go.svg)](https://go.dev)
+![Platforms](.github/badges/platforms.svg)
+[![Ollama](.github/badges/ollama.svg)](https://ollama.com)
+[![LM Studio](.github/badges/lmstudio.svg)](https://lmstudio.ai)
+[![License](.github/badges/license.svg)](LICENSE.txt)
+[![Release](https://img.shields.io/github/v/release/novalo-dev/Somcp-Relay?style=flat&label=release)](https://github.com/novalo-dev/Somcp-Relay/releases/latest)
+[![CI](https://github.com/novalo-dev/Somcp-Relay/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/novalo-dev/Somcp-Relay/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/novalo-dev/Somcp-Relay?style=flat&logo=github&label=Stars)](https://github.com/novalo-dev/Somcp-Relay/stargazers)
+
+For PrestaShop shops using the
+[O'So MCP Server](https://github.com/novalo-dev/Prestashop-MCP-Server) module:
+O'So AI Relay links the shop's built-in assistant to an AI running on your own
+computer (Ollama, LM Studio or any OpenAI-compatible software). Nothing to
+open on your network, no API key to pay for.
 
 ## Install
 
@@ -62,3 +73,8 @@ oso version | help
 ```
 
 Add `--lang en|fr|es|de` to any command.
+
+## License
+
+[Academic Free License 3.0](LICENSE.txt). Made by
+[Novalo](https://novalo.fr) - [sponsor the project](https://github.com/sponsors/novalo-dev).
