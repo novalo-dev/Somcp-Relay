@@ -60,8 +60,9 @@ The interface opens in your browser:
 
 1. **Shop** - paste the command your shop's back office shows: the shop is linked.
 2. **Local AI** - type your AI's address and click **Test**. If you have
-   none, choose a model (the one recommended for your computer is already
-   selected) and click **Install everything** under Ollama or LM Studio.
+   none, pick one of the 20 models listed under Ollama or LM Studio, from
+   the lightest to the most capable (the one recommended for your computer
+   is already selected), and click **Install everything**.
 3. **Relay** - it runs on its own. Turn on **Start with the computer** to keep
    it running after you close the window.
 
@@ -72,7 +73,7 @@ oso ui                         open the interface
 oso pair <shop> <code>         link a shop
 oso ai <address>               set your AI's address and test it
 oso ai free|stop|start         free your AI's memory, stop or start it
-oso llm setup ollama|lmstudio [1.5b|3b|7b|14b]
+oso llm setup ollama|lmstudio [model]
                                install a local AI and a model
 oso llm list                   list your AI's models
 oso llm test [model]           check that a model can call tools

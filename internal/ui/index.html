@@ -164,10 +164,9 @@ input.code{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase
         <p class="msg" id="ai-msg" role="status"></p>
         <div class="list models" id="models" hidden></div>
         <div class="or" data-t="ui.ai.none2"></div>
-        <div class="row"><label for="size" class="hint" data-t="ui.setup.model"></label><select id="size"></select></div>
         <div class="grid2">
-          <div class="card"><div class="head"><b>Ollama</b><span class="hint" data-t="ui.setup.ollama"></span></div><button class="btn" type="button" data-setup="ollama" data-t="ui.setup.go"></button><div class="bar" data-bar="ollama" hidden><div></div></div></div>
-          <div class="card"><div class="head"><b>LM Studio</b><span class="hint" data-t="ui.setup.lmstudio"></span></div><button class="btn" type="button" data-setup="lmstudio" data-t="ui.setup.go"></button><div class="bar" data-bar="lmstudio" hidden><div></div></div></div>
+          <div class="card"><div class="head"><b>Ollama</b><span class="hint" data-t="ui.setup.ollama"></span></div><select data-model="ollama" aria-label="Ollama"></select><button class="btn" type="button" data-setup="ollama" data-t="ui.setup.go"></button><div class="bar" data-bar="ollama" hidden><div></div></div></div>
+          <div class="card"><div class="head"><b>LM Studio</b><span class="hint" data-t="ui.setup.lmstudio"></span></div><select data-model="lmstudio" aria-label="LM Studio"></select><button class="btn" type="button" data-setup="lmstudio" data-t="ui.setup.go"></button><div class="bar" data-bar="lmstudio" hidden><div></div></div></div>
         </div>
         <p class="msg" id="setup-msg" role="status"></p>
         <p class="hint" data-t="ui.setup.intro"></p>
@@ -252,23 +251,30 @@ input.code{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase
   function t(key) { return texts[key] || key; }
   function fmt(key) { var a = Array.prototype.slice.call(arguments, 1), i = 0; return t(key).replace(/%[sd]/g, function () { return String(a[i++]); }); }
   function fmtArr(key, args) { return fmt.apply(null, [key].concat(args || [])); }
-  // The models the setup offers, the recommended one marked and chosen by
-  // default; rebuilt only when the language changes, so a choice survives
-  // the refreshes.
-  var sizesLang = '';
-  function drawSizes() {
-    var select = $('size'), lang = state.lang || '';
-    if (sizesLang === lang && select.options.length) { return; }
-    var chosen = select.value || state.size;
-    select.textContent = '';
-    (state.sizes || []).forEach(function (size) {
-      var option = document.createElement('option');
-      option.value = size.name;
-      option.textContent = fmt('ui.setup.size', size.name.toUpperCase(), size.memory) + (size.name === state.size ? ' - ' + t('ui.setup.recommended') : '');
-      select.appendChild(option);
+  // Each AI's models, weakest first: the one recommended for this computer
+  // is marked and chosen by default, and one bigger than its memory is
+  // flagged but still offered. Rebuilt only when the language changes, so
+  // a choice survives the refreshes.
+  var catalogLang = '';
+  function drawCatalog() {
+    var lang = state.lang || '';
+    document.querySelectorAll('[data-model]').forEach(function (select) {
+      var kind = select.getAttribute('data-model');
+      if (catalogLang === lang && select.options.length) { return; }
+      var picked = (state.picked || {})[kind];
+      var chosen = select.value || picked;
+      select.textContent = '';
+      ((state.catalog || {})[kind] || []).forEach(function (m) {
+        var option = document.createElement('option');
+        option.value = m.id;
+        var mark = m.id === picked ? ' - ' + t('ui.setup.recommended')
+          : (state.memory && m.memory > state.memory ? ' - ' + t('ui.setup.too_big') : '');
+        option.textContent = fmt('ui.setup.offer', m.name, Number(m.download).toLocaleString(state.lang), m.memory) + mark;
+        select.appendChild(option);
+      });
+      select.value = chosen;
     });
-    select.value = chosen;
-    sizesLang = lang;
+    catalogLang = lang;
   }
   function $(id) { return document.getElementById(id); }
   function api(path, body) {
@@ -382,14 +388,14 @@ input.code{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase
     $('pc').hidden = setupStep !== 2 || !state.memory;
     $('pc-mem').textContent = state.memory ? fmt('ui.pc.mem', state.memory) : '';
     $('pc-rec').textContent = fmt('ui.pc.rec', state.recommend);
-    drawSizes();
+    drawCatalog();
     $('revoked').hidden = !state.revoked || linked;
     if (!$('shop').value && document.activeElement !== $('shop')) { $('shop').value = state.shop.url || ''; }
     if (!$('addr').value && document.activeElement !== $('addr')) { $('addr').value = state.ai || ''; }
     if (!testing) { drawModels(); $('test-btn').textContent = t(models().length ? 'ui.ai.retry' : 'ui.ai.test'); }
     var su = state.setup || {}, installing = !!su.running;
     document.querySelectorAll('[data-setup]').forEach(function (b) { b.disabled = installing; });
-    $('size').disabled = installing;
+    document.querySelectorAll('[data-model]').forEach(function (s) { s.disabled = installing; });
     document.querySelectorAll('[data-bar]').forEach(function (bar) {
       var mine = su.kind === bar.getAttribute('data-bar') && (installing || su.done);
       bar.hidden = !mine; bar.classList.toggle('busy', installing && su.percent < 0);
@@ -459,7 +465,7 @@ input.code{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase
   $('ai').addEventListener('submit', function (e) { e.preventDefault(); testAI(); });
   document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { $('addr').value = b.getAttribute('data-preset'); testAI(); }); });
   document.querySelectorAll('[data-setup]').forEach(function (b) {
-    b.addEventListener('click', function () { api('/api/setup', { kind: b.getAttribute('data-setup'), size: $('size').value }).then(refresh).catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); }); });
+    b.addEventListener('click', function () { api('/api/setup', { kind: b.getAttribute('data-setup'), model: document.querySelector('[data-model="' + b.getAttribute('data-setup') + '"]').value }).then(refresh).catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); }); });
   });
   document.querySelectorAll('[data-power]').forEach(function (b) {
     b.addEventListener('click', function () {

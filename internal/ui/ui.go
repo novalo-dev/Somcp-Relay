@@ -165,9 +165,12 @@ func (s *Server) state(r *http.Request) (any, error) {
 		"relay":     st,
 		"startup":   service.Installed(),
 		"memory":    memory,
-		"recommend": llm.Recommend(memory),
-		"sizes":     llm.Sizes,
-		"size":      llm.RecommendSize(memory),
+		"recommend": llm.Recommended(llm.KindOllama, memory),
+		"catalog":   map[string][]llm.Offer{llm.KindOllama: llm.OllamaCatalog, llm.KindLMStudio: llm.LMStudioCatalog},
+		"picked": map[string]string{
+			llm.KindOllama:   llm.Recommended(llm.KindOllama, memory),
+			llm.KindLMStudio: llm.Recommended(llm.KindLMStudio, memory),
+		},
 		"installed": cfg.Installed,
 		"keep":      cfg.KeepLoaded,
 		"used":      used,
@@ -260,8 +263,8 @@ func (s *Server) startup(r *http.Request) (any, error) {
 // state. One setup at a time.
 func (s *Server) startSetup(r *http.Request) (any, error) {
 	var in struct {
-		Kind string `json:"kind"`
-		Size string `json:"size"`
+		Kind  string `json:"kind"`
+		Model string `json:"model"`
 	}
 	if err := decode(r, &in); err != nil {
 		return nil, err
@@ -269,9 +272,9 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 	if in.Kind != llm.KindOllama && in.Kind != llm.KindLMStudio {
 		return nil, errors.New("unknown AI")
 	}
-	// Empty means the recommended size; anything else must be one offered.
-	if in.Size != "" && !llm.ValidSize(in.Size) {
-		return nil, errors.New("unknown model size")
+	// Empty means the recommended model; the page only offers its list.
+	if in.Model != "" && !llm.InCatalog(in.Kind, in.Model) {
+		return nil, errors.New("unknown model")
 	}
 	s.mu.Lock()
 	if running, _ := s.setup["running"].(bool); running {
@@ -288,7 +291,7 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 			s.setup = map[string]any{"kind": in.Kind, "running": true, "key": p.Key, "args": p.Args, "percent": p.Percent}
 			s.mu.Unlock()
 		}
-		address, installed, err := llm.Setup(ctx, in.Kind, in.Size, report)
+		address, installed, err := llm.Setup(ctx, in.Kind, in.Model, report)
 		if installed {
 			_ = app.RememberInstalled(in.Kind)
 		}

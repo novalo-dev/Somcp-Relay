@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+**Twenty models to choose from, for Ollama and for LM Studio.** Each list
+goes from the lightest model to the most capable, with its download size and
+the memory it needs; all of them can act on your shop. The one suited to your
+computer is marked recommended and selected, and a model bigger than your
+computer's memory is flagged but can still be installed. On the command line,
+`oso llm setup` takes any model name, for example `oso llm setup ollama
+qwen3:14b`.
+
 ## 0.3.4 - 2026-11-02
 
 ### Security

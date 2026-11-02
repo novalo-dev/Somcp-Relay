@@ -19,7 +19,8 @@ import (
 // Setup installs a local AI with nothing for the merchant to do: it
 // downloads the software from its official site, installs it for the
 // current account only - no administrator rights -, starts it, downloads
-// the model chosen - by default the one suited to the computer's memory -,
+// the model chosen - by default the one recommended for the computer's
+// memory -,
 // and returns the address where
 // it answers. The commands are the ones each vendor documents for its own
 // silent install; nothing else is run.
@@ -48,26 +49,26 @@ type Progress struct {
 var ErrNeedsZstd = errors.New("zstd missing")
 
 // Setup installs and starts the AI of the given kind, then downloads the
-// model of the given size, or the recommended one when size is empty. It
-// returns the address of the AI, and whether it installed the AI itself -
-// one already there is not the relay's to uninstall later.
-func Setup(ctx context.Context, kind, size string, report func(Progress)) (string, bool, error) {
-	if size == "" {
-		size = RecommendSize(MemoryGB())
+// given model, or the one recommended for this computer when model is
+// empty. It returns the address of the AI, and whether it installed the AI
+// itself - one already there is not the relay's to uninstall later.
+func Setup(ctx context.Context, kind, model string, report func(Progress)) (string, bool, error) {
+	if model == "" {
+		model = Recommended(kind, MemoryGB())
 	}
-	if !ValidSize(size) {
-		return "", false, fmt.Errorf("unknown model size %q", size)
+	if !ValidModel(kind, model) {
+		return "", false, fmt.Errorf("not a model name: %q", model)
 	}
 	switch kind {
 	case KindOllama:
-		return setupOllama(ctx, size, report)
+		return setupOllama(ctx, model, report)
 	case KindLMStudio:
-		return setupLMStudio(ctx, size, report)
+		return setupLMStudio(ctx, model, report)
 	}
 	return "", false, fmt.Errorf("unknown AI %q", kind)
 }
 
-func setupOllama(ctx context.Context, size string, report func(Progress)) (string, bool, error) {
+func setupOllama(ctx context.Context, model string, report func(Progress)) (string, bool, error) {
 	base, _ := Normalize(OllamaAddress)
 	installed := false
 	if !OllamaAnswers(ctx, base) {
@@ -87,7 +88,6 @@ func setupOllama(ctx context.Context, size string, report func(Progress)) (strin
 		}
 	}
 
-	model := OllamaModel(size)
 	report(Progress{Key: "setup.download_model", Args: []any{model, 0}, Percent: 0})
 	err := Pull(ctx, base, model, func(p int) {
 		report(Progress{Key: "setup.download_model", Args: []any{model, p}, Percent: p})
@@ -190,7 +190,7 @@ func startOllama() error {
 	return cmd.Start()
 }
 
-func setupLMStudio(ctx context.Context, size string, report func(Progress)) (string, bool, error) {
+func setupLMStudio(ctx context.Context, model string, report func(Progress)) (string, bool, error) {
 	lms := lmsPath()
 	installed := lms == ""
 	if lms == "" {
@@ -239,7 +239,6 @@ func setupLMStudio(ctx context.Context, size string, report func(Progress)) (str
 		}
 	}
 
-	model, source := LMStudioModel(size)
 	report(Progress{Key: "setup.download_model", Args: []any{model, 0}, Percent: 0})
 	// --yes takes the download variant LM Studio preselects for this
 	// computer. Its progress is read from what it prints.
@@ -251,15 +250,8 @@ func setupLMStudio(ctx context.Context, size string, report func(Progress)) (str
 				report(Progress{Key: "setup.download_model", Args: []any{model, p}, Percent: p})
 			}
 		}
-	}, lms, "get", source, "--yes")
+	}, lms, "get", model, "--yes")
 	return LMStudioAddress, installed, err
-}
-
-// LMStudioModel is a size from LM Studio's own repository of tested
-// builds: the name shown, and what lms gets.
-func LMStudioModel(size string) (string, string) {
-	name := "Qwen2.5-" + strings.ToUpper(size) + "-Instruct"
-	return name, "https://huggingface.co/lmstudio-community/" + name + "-GGUF"
 }
 
 // lmsPath finds LM Studio's command, installed in ~/.lmstudio/bin unless
