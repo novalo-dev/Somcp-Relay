@@ -53,13 +53,26 @@ tested. The back office offers only the models with `"tools": true`. Answer:
 
 ## next - wait for a chat request
 
-`GET action=next`. The shop holds the request up to about 25 seconds while it
-has nothing to send, then answers `204`, and the relay asks again. With a
-request:
+`GET action=next&wait=1`. While the shop's chat is in use, the shop holds the
+request up to about 20 seconds while it has nothing to send, then answers
+`204`, and the relay asks again. With a request:
 
 ```json
 {"job": {"id": "<id>", "request": {"model": "qwen2.5:7b", "messages": [...], "tools": [...]}}}
 ```
+
+While nobody has used the chat for a few minutes, the shop answers at once
+instead of holding the call, and says how many seconds to wait before asking
+again:
+
+```json
+{"job": null, "wait": 15}
+```
+
+The relay waits that long, capped at 120 seconds, then asks again. `wait=1`
+in the address tells the shop the relay understands that answer; without it
+the shop always holds the call, since a relay that ignores `wait` would ask
+again at once.
 
 `request` is an OpenAI-compatible chat completion body. The relay refuses it
 unless `model` is one it reported with `"tools": true` and `messages` is a

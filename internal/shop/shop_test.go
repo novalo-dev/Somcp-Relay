@@ -50,7 +50,12 @@ func TestProtocol(t *testing.T) {
 		case "hello":
 			_, _ = w.Write([]byte(`{"shop":{"name":"MyShop"}}`))
 		case "next":
-			_, _ = w.Write([]byte(`{"job":{"id":"j1","request":{"model":"m","messages":[]}}}`))
+			// The relay says it understands the idle pause; the shop asks
+			// for one far above the cap, which the relay must clamp.
+			if r.URL.Query().Get("wait") != "1" {
+				t.Error("next without wait=1")
+			}
+			_, _ = w.Write([]byte(`{"job":{"id":"j1","request":{"model":"m","messages":[]}},"wait":9999}`))
 		case "result":
 			_ = json.Unmarshal(body, &result)
 			w.WriteHeader(http.StatusNoContent)
@@ -74,9 +79,12 @@ func TestProtocol(t *testing.T) {
 	if _, err := client.Hello(ctx, "Ollama", []llm.Model{{ID: "m"}}); err != nil {
 		t.Fatal(err)
 	}
-	job, err := client.Next(ctx)
+	job, idle, err := client.Next(ctx)
 	if err != nil || job == nil || job.ID != "j1" {
 		t.Fatalf("next: %v %v", job, err)
+	}
+	if idle != MaxIdle {
+		t.Errorf("idle pause not capped: %v", idle)
 	}
 	if err := client.Result(ctx, "j1", 200, []byte(`{"choices":[]}`), ""); err != nil {
 		t.Fatal(err)
@@ -85,7 +93,7 @@ func TestProtocol(t *testing.T) {
 		t.Errorf("result: %v", result)
 	}
 	revoked = true
-	if _, err := client.Next(ctx); err != ErrRevoked {
+	if _, _, err := client.Next(ctx); err != ErrRevoked {
 		t.Errorf("revoked: %v", err)
 	}
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1 - 2026-11-02
+
+### Changed
+
+**The relay rests when nobody uses the shop's chat.** It used to keep one
+request open on your shop at all times, which held one of the shop's PHP
+processes for as long as the relay ran. When the chat has not been used for
+a few minutes, the shop now answers at once and the relay comes back every 15
+seconds; as soon as someone opens the chat, it goes back to answering without
+delay.
+
 ## 0.2.0 - 2026-11-02
 
 ### Changed

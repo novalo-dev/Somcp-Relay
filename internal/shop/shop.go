@@ -113,15 +113,30 @@ func (c *Client) Hello(ctx context.Context, software string, models []llm.Model)
 	return answer.Shop, err
 }
 
+// MaxIdle caps the pause a shop may ask for, whatever it sends.
+const MaxIdle = 2 * time.Minute
+
 // Next waits for a job; nil when the shop had none before its wait ended.
-func (c *Client) Next(ctx context.Context) (*Job, error) {
+// While nobody uses the shop's chat, the shop answers at once instead of
+// holding the call, and says how long to wait before asking again: idle is
+// that pause, zero otherwise. wait=1 tells the shop this relay understands
+// it - an older one, told nothing, would ask again at once.
+func (c *Client) Next(ctx context.Context) (*Job, time.Duration, error) {
 	var answer struct {
-		Job *Job `json:"job"`
+		Job  *Job `json:"job"`
+		Wait int  `json:"wait"`
 	}
-	if err := c.call(ctx, http.MethodGet, "next", nil, &answer, true); err != nil {
-		return nil, err
+	if err := c.call(ctx, http.MethodGet, "next&wait=1", nil, &answer, true); err != nil {
+		return nil, 0, err
 	}
-	return answer.Job, nil
+	idle := time.Duration(answer.Wait) * time.Second
+	if idle < 0 {
+		idle = 0
+	}
+	if idle > MaxIdle {
+		idle = MaxIdle
+	}
+	return answer.Job, idle, nil
 }
 
 // Result posts the AI's answer to a job, or the reason there is none.

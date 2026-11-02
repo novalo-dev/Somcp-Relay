@@ -198,7 +198,7 @@ func Run(ctx context.Context, log Logger) error {
 		}
 		wasPaused = false
 
-		job, err := client.Next(ctx)
+		job, idle, err := client.Next(ctx)
 		if errors.Is(err, shop.ErrRevoked) {
 			return err
 		}
@@ -217,6 +217,11 @@ func Run(ctx context.Context, log Logger) error {
 		state.LastContact = time.Now()
 		writeState(state)
 		if job == nil {
+			// Nobody is chatting: the shop asked for a pause rather than
+			// keeping one of its PHP processes busy with this call.
+			if idle > 0 {
+				sleep(ctx, idle)
+			}
 			continue
 		}
 
