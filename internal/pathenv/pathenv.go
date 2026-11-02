@@ -126,3 +126,34 @@ func samePath(a, b string) bool {
 	}
 	return filepath.Clean(a) == filepath.Clean(b)
 }
+
+// Remove takes oso off the PATH and deletes the copy addtopath made. A
+// running program cannot be deleted on Windows: it is then deleted by a
+// command left to run once the relay has exited.
+func Remove() error {
+	dir, err := Home()
+	if err != nil {
+		return err
+	}
+	pathErr := remove(dir)
+	name := "oso"
+	if runtime.GOOS == "windows" {
+		name = "oso.exe"
+	}
+	program := filepath.Join(dir, name)
+	if _, err := os.Stat(program); err != nil {
+		return pathErr
+	}
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("cmd", "/C", "ping -n 4 127.0.0.1 >NUL & del /F /Q \""+program+"\" & rmdir \""+dir+"\"")
+		hideAndDetach(cmd)
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+		return pathErr
+	}
+	if err := os.Remove(program); err != nil {
+		return err
+	}
+	return pathErr
+}

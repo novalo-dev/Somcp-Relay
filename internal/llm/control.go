@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -189,4 +190,93 @@ func launchOllama() error {
 		}
 	}
 	return startOllama()
+}
+
+// Loaded says how much memory the AI's loaded models take, in bytes, when
+// the AI tells: Ollama does, LM Studio's server does not, and then ok is
+// false.
+func Loaded(ctx context.Context, address string) (int64, bool) {
+	base, err := Normalize(address)
+	if err != nil || !OllamaAnswers(ctx, base) {
+		return 0, false
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, OllamaRoot(base)+"/api/ps", nil)
+	if err != nil {
+		return 0, false
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, false
+	}
+	defer resp.Body.Close()
+	var loaded struct {
+		Models []struct {
+			Size int64 `json:"size"`
+		} `json:"models"`
+	}
+	if json.NewDecoder(resp.Body).Decode(&loaded) != nil {
+		return 0, false
+	}
+	var total int64
+	for _, m := range loaded.Models {
+		total += m.Size
+	}
+	return total, true
+}
+
+// Uninstall removes an AI the relay installed, with its downloaded models:
+// the program from where Setup put it, and the folder where it keeps its
+// models. It never touches an AI installed another way, which the caller
+// checks against what Setup recorded.
+func Uninstall(ctx context.Context, kind string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	switch kind {
+	case KindOllama:
+		_ = stopOllama(ctx)
+		switch runtime.GOOS {
+		case "windows":
+			// Ollama's own uninstaller, silent, as its setup was.
+			unins := filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "Ollama", "unins000.exe")
+			if fileExists(unins) {
+				if err := runHidden(ctx, unins, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"); err != nil {
+					return err
+				}
+			}
+		case "darwin":
+			if err := os.RemoveAll(filepath.Join(home, "Applications", "Ollama.app")); err != nil {
+				return err
+			}
+		default:
+			dir, err := setupDir()
+			if err != nil {
+				return err
+			}
+			if err := os.RemoveAll(filepath.Join(dir, "ollama")); err != nil {
+				return err
+			}
+		}
+		return os.RemoveAll(filepath.Join(home, ".ollama"))
+	case KindLMStudio:
+		if lms := lmsPath(); lms != "" {
+			_ = runHidden(ctx, lms, "server", "stop")
+			_ = runHidden(ctx, lms, "daemon", "down")
+		}
+		root := filepath.Join(home, ".lmstudio")
+		pointer := filepath.Join(home, ".lmstudio-home-pointer")
+		if moved, err := os.ReadFile(pointer); err == nil && len(bytes.TrimSpace(moved)) > 0 {
+			root = string(bytes.TrimSpace(moved))
+		}
+		// A moved home is removed only when it is plainly LM Studio's
+		// folder: a pointer to a broader folder must never wipe it.
+		name := strings.ToLower(filepath.Base(filepath.Clean(root)))
+		if filepath.Clean(root) == filepath.Clean(home) || !strings.Contains(strings.ReplaceAll(name, "-", ""), "lmstudio") {
+			return errors.New("LM Studio's folder is not where the relay put it: remove it by hand")
+		}
+		_ = os.Remove(pointer)
+		return os.RemoveAll(root)
+	}
+	return ErrUnknownAI
 }

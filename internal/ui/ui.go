@@ -14,6 +14,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/novalo-dev/somcp-relay/internal/config"
 	"github.com/novalo-dev/somcp-relay/internal/i18n"
 	"github.com/novalo-dev/somcp-relay/internal/llm"
+	"github.com/novalo-dev/somcp-relay/internal/pathenv"
 	"github.com/novalo-dev/somcp-relay/internal/relay"
 	"github.com/novalo-dev/somcp-relay/internal/service"
 )
@@ -63,16 +65,19 @@ func (s *Server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.index)
 	api := map[string]func(*http.Request) (any, error){
-		"/api/state":   s.state,
-		"/api/lang":    s.lang,
-		"/api/pair":    s.pair,
-		"/api/ai":      s.ai,
-		"/api/test":    s.test,
-		"/api/pause":   s.pause,
-		"/api/unlink":  func(*http.Request) (any, error) { return nil, app.Unlink() },
-		"/api/startup": s.startup,
-		"/api/setup":   s.startSetup,
-		"/api/power":   s.power,
+		"/api/state":    s.state,
+		"/api/lang":     s.lang,
+		"/api/pair":     s.pair,
+		"/api/ai":       s.ai,
+		"/api/test":     s.test,
+		"/api/pause":    s.pause,
+		"/api/unlink":   func(*http.Request) (any, error) { return nil, app.Unlink() },
+		"/api/startup":  s.startup,
+		"/api/setup":    s.startSetup,
+		"/api/power":    s.power,
+		"/api/keep":     s.keep,
+		"/api/removeai": s.removeAI,
+		"/api/remove":   s.remove,
 	}
 	for path, handler := range api {
 		handler := handler
@@ -126,7 +131,7 @@ func decode(r *http.Request, into any) error {
 	return json.NewDecoder(http.MaxBytesReader(nil, r.Body, 1<<16)).Decode(into)
 }
 
-func (s *Server) state(*http.Request) (any, error) {
+func (s *Server) state(r *http.Request) (any, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, err
@@ -137,6 +142,14 @@ func (s *Server) state(*http.Request) (any, error) {
 	setup := s.setup
 	s.mu.Unlock()
 	carrier, problem, revoked := s.carrier()
+	var used int64
+	usedKnown := false
+	if cfg.AIURL != "" {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		used, usedKnown = llm.Loaded(ctx, cfg.AIURL)
+		cancel()
+	}
+	home, _ := pathenv.Home()
 	return map[string]any{
 		"carrier":   carrier,
 		"problem":   problem,
@@ -153,6 +166,11 @@ func (s *Server) state(*http.Request) (any, error) {
 		"startup":   service.Installed(),
 		"memory":    memory,
 		"recommend": llm.Recommend(memory),
+		"installed": cfg.Installed,
+		"keep":      cfg.KeepLoaded,
+		"used":      used,
+		"usedKnown": usedKnown,
+		"home":      home,
 		"lmstudio":  lmModel(memory),
 		"setup":     setup,
 	}, nil
@@ -264,7 +282,10 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 			s.setup = map[string]any{"kind": in.Kind, "running": true, "key": p.Key, "args": p.Args, "percent": p.Percent}
 			s.mu.Unlock()
 		}
-		address, err := llm.Setup(ctx, in.Kind, llm.MemoryGB(), report)
+		address, installed, err := llm.Setup(ctx, in.Kind, llm.MemoryGB(), report)
+		if installed {
+			_ = app.RememberInstalled(in.Kind)
+		}
 		var models []llm.Model
 		software := ""
 		if err == nil {
@@ -310,4 +331,52 @@ func (s *Server) power(r *http.Request) (any, error) {
 		return nil, err
 	}
 	return map[string]string{"message": i18n.T(key)}, nil
+}
+
+// keep keeps the model loaded between requests, or lets the relay free it.
+func (s *Server) keep(r *http.Request) (any, error) {
+	var in struct {
+		Keep bool `json:"keep"`
+	}
+	if err := decode(r, &in); err != nil {
+		return nil, err
+	}
+	return nil, app.SetKeepLoaded(in.Keep)
+}
+
+// removeAI uninstalls an AI the relay installed.
+func (s *Server) removeAI(r *http.Request) (any, error) {
+	var in struct {
+		Kind string `json:"kind"`
+	}
+	if err := decode(r, &in); err != nil {
+		return nil, err
+	}
+	err := app.RemoveAI(r.Context(), in.Kind)
+	if errors.Is(err, app.ErrNotOurs) {
+		return nil, errors.New(i18n.T("removeai.not_ours"))
+	}
+	return nil, err
+}
+
+// remove uninstalls the relay itself. The answer goes out first; then the
+// relay removes itself and exits, since nothing is left to serve the page.
+func (s *Server) remove(r *http.Request) (any, error) {
+	var in struct {
+		AI bool `json:"ai"`
+	}
+	if err := decode(r, &in); err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	if s.run.cancel != nil {
+		s.run.cancel()
+	}
+	s.mu.Unlock()
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		_ = app.RemoveAll(context.Background(), in.AI)
+		os.Exit(0)
+	}()
+	return nil, nil
 }

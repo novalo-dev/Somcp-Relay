@@ -117,6 +117,18 @@ func dispatch(ctx context.Context, args []string) error {
 		return serviceCall(service.Start, "service.started")
 	case "stop", "close":
 		return serviceCall(service.Stop, "service.stopped")
+	case "remove":
+		withAI := !(len(args) > 1 && args[1] == "--keep-ai")
+		fmt.Print(i18n.T("remove.confirm"))
+		var answer string
+		_, _ = fmt.Scanln(&answer)
+		if a := strings.ToLower(strings.TrimSpace(answer)); a != "y" && a != "yes" && a != "o" && a != "oui" && a != "s" && a != "si" && a != "j" && a != "ja" {
+			return nil
+		}
+		if err := app.RemoveAll(ctx, withAI); err != nil {
+			return err
+		}
+		fmt.Println(i18n.T("remove.done"))
 	case "addtopath":
 		res, err := pathenv.Add()
 		if err != nil {
@@ -177,15 +189,28 @@ func status() {
 }
 
 func llmCommand(ctx context.Context, args []string) error {
+	if len(args) == 2 && args[0] == "remove" {
+		if err := app.RemoveAI(ctx, args[1]); err != nil {
+			if errors.Is(err, app.ErrNotOurs) {
+				return errors.New(i18n.T("removeai.not_ours"))
+			}
+			return err
+		}
+		fmt.Println(i18n.T("removeai.done", args[1]))
+		return nil
+	}
 	// setup needs no AI yet: it is how one gets installed.
 	if len(args) >= 1 && args[0] == "setup" {
 		if len(args) != 2 {
 			return usage("oso llm setup ollama|lmstudio")
 		}
-		address, err := llm.Setup(ctx, args[1], llm.MemoryGB(), func(p llm.Progress) {
+		address, installed, err := llm.Setup(ctx, args[1], llm.MemoryGB(), func(p llm.Progress) {
 			fmt.Printf("\r%s", i18n.T(p.Key, p.Args...))
 		})
 		fmt.Println()
+		if installed {
+			_ = app.RememberInstalled(args[1])
+		}
 		if errors.Is(err, llm.ErrNeedsZstd) {
 			return errors.New(i18n.T("setup.zstd"))
 		}

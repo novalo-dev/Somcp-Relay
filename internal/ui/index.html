@@ -6,243 +6,236 @@
 <title>O'So AI Relay</title>
 <style>
 :root{
-  --bg:#F4F5F7;--card:#FFFFFF;--ink:#16181D;--muted:#5F6672;--line:#E2E5EA;--soft:#F1F3F6;
-  --accent:#3B5BDB;--accent-ink:#2944B8;--accent-soft:#EDF1FD;
-  --on-accent:#FFFFFF;--ok:#11845B;--ok-soft:#E5F5EE;--warn:#A15C07;--warn-soft:#FDF3E3;--bad:#B42318;--bad-soft:#FDECEA;
-  --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0F1115;--card:#171A20;--ink:#ECEEF2;--muted:#9AA1AD;--line:#262A33;--soft:#1E222A;
-    --accent:#7C93F5;--accent-ink:#A9B8FA;--accent-soft:#1D2440;--on-accent:#0F1115;
-    --ok:#3CCB8C;--ok-soft:#112A20;--warn:#F0B35A;--warn-soft:#2E2312;--bad:#F2786B;--bad-soft:#331816;
-    --shadow:none;
-  }
+  --bg:#0D0F12;--panel:#13161A;--line:#1E2228;--line2:#2A2F37;--ink:#E6E8EB;--muted:#9AA2AC;--faint:#8A929C;--dim:#6E7680;
+  --ok:#3DDC97;--ok-ink:#7FD7B0;--warn:#F2B65A;--bad:#F28B8B;--bad-ink:#F2A3A3;--bad-bg:#1E1416;--bad-line:#4A2A2E;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:28px 20px 48px;display:flex;flex-direction:column;gap:18px}
-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{color:var(--on-accent);width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.title{display:flex;flex-direction:column;flex:1 1 220px;min-width:0}
-.title strong{font-size:17px;letter-spacing:-.01em}
-.title span{font-size:13px;color:var(--muted)}
-.pill{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;background:var(--soft);color:var(--muted)}
-.pill i{width:8px;height:8px;border-radius:50%;background:currentColor}
-.pill.on{background:var(--ok-soft);color:var(--ok)}
-.pill.on i{animation:pulse 1.6s ease-in-out infinite}
-.pill.paused{background:var(--warn-soft);color:var(--warn)}
-@keyframes pulse{50%{opacity:.35}}
-select{height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:13px}
-
-.progress{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
-.track{height:6px;border-radius:999px;background:var(--soft);overflow:hidden;margin-bottom:14px}
-.track div{height:100%;width:0;background:var(--ok);border-radius:999px;transition:width .4s ease}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0;padding:0}
-.steps li{list-style:none;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-width:0}
-.steps li b{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;border:1.5px solid var(--line);color:var(--muted)}
-.steps li.now{color:var(--ink);font-weight:600}
-.steps li.now b{border-color:var(--accent);color:var(--accent)}
-.steps li.done b{background:var(--ok);border-color:var(--ok);color:#fff}
-
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
-.card>.head{display:flex;align-items:center;gap:12px;padding:16px 20px}
-.num{width:28px;height:28px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--accent-soft);color:var(--accent-ink)}
-.card.done .num{background:var(--ok-soft);color:var(--ok)}
-.head .grow{flex:1 1 auto;min-width:0}
-.head h2{margin:0;font-size:15px}
-.head p{margin:0;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.body{padding:0 20px 20px;display:flex;flex-direction:column;gap:12px}
-.card.closed .body{display:none}
-label{font-size:13px;font-weight:600}
-.field{display:flex;flex-direction:column;gap:6px}
-input[type=text]{height:42px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;width:100%}
-input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-input.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:2px;text-transform:uppercase}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--ok-ink)}a:hover{color:#A8E8CB}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.top{height:52px;padding:0 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0}
+.brand b{font-weight:600}
+.mono{font-family:var(--mono)}
+.ver{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.btn{height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn:hover{background:var(--panel)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.go{background:var(--ok);border-color:var(--ok);color:#0D0F12;font-weight:600}
+.btn.go:hover{filter:brightness(1.08)}
+.btn.danger{border-color:#5A2A2A;color:var(--bad-ink)}
+.btn.kill{background:#C2453F;border-color:#C2453F;color:#fff;font-weight:600}
+.btn.big{height:42px;padding:0 18px;font-size:14px;border-radius:8px}
+select{height:32px;padding:0 8px;border-radius:6px;border:1px solid var(--line2);background:var(--panel);font-size:13px}
+.body{flex:1 1 auto;display:flex;flex-wrap:wrap;min-height:0}
+.side{width:340px;flex:0 0 340px;padding:24px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px}
+.main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column}
+.pad{padding:36px 44px;display:flex;flex-direction:column;gap:20px;max-width:760px}
+.label{font-size:12px;color:var(--dim);letter-spacing:.06em}
+h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}
+h2{margin:0;font-size:16px;font-weight:600}
+.sub{font-size:14px;color:var(--muted);margin:0}
+.hint{font-size:12.5px;color:var(--faint);margin:0}
+.steps{display:flex;flex-direction:column;gap:4px}
+.step{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid transparent;color:var(--muted)}
+.step.now{background:var(--panel);border-color:var(--line2);color:var(--ink);font-weight:500}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid #3A3F47;color:var(--faint);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;flex:0 0 auto}
+.step.now .dot{border-color:var(--ok-ink);color:var(--ok-ink)}
+.step.done .dot{background:var(--ok);border-color:var(--ok);color:#0D0F12;font-family:inherit;font-weight:600}
+.step small{display:block;font-size:12px;color:var(--faint);font-weight:400}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:13px;color:var(--muted)}
+input[type=text]{height:42px;padding:0 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);font-size:14px;width:100%}
+input[type=text]:focus,select:focus,.btn:focus-visible{outline:2px solid var(--ok-ink);outline-offset:1px}
+input.code{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.row>input{flex:1 1 220px;width:auto}
-.hint{font-size:12.5px;color:var(--muted);margin:0}
-button{font:inherit;cursor:pointer}
-.btn{height:42px;padding:0 16px;border-radius:9px;font-size:14px;font-weight:600;border:1px solid transparent;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-.btn.primary{background:var(--accent);color:var(--on-accent)}
-.btn.primary:hover{filter:brightness(1.07)}
-.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
-.btn.ghost:hover{background:var(--soft)}
-.btn.small{height:32px;padding:0 12px;font-size:13px}
-.btn.danger{background:transparent;border-color:var(--line);color:var(--bad)}
-.btn:disabled{opacity:.55;cursor:default}
-.chip{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:12.5px}
-.chip:hover{border-color:var(--accent);color:var(--accent-ink)}
-.msg{font-size:13px;border-radius:9px;padding:9px 12px;margin:0}
+.row>input{flex:1 1 240px;width:auto}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.or{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:12px;letter-spacing:.04em}
+.or::before,.or::after{content:"";flex:1 1 auto;height:1px;background:var(--line)}
+.msg{font-size:13px;margin:0}
 .msg:empty{display:none}
-.msg.ok{background:var(--ok-soft);color:var(--ok)}
-.msg.bad{background:var(--bad-soft);color:var(--bad)}
-.msg.info{background:var(--soft);color:var(--muted)}
-.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block}
+.msg.ok{color:var(--ok-ink)}.msg.bad{color:var(--bad-ink)}.msg.info{color:var(--muted)}
+.list{border:1px solid var(--line);border-radius:8px}
+.list>div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 14px;border-top:1px solid var(--line);font-size:13px}
+.list>div:first-child{border-top:0}
+.list span.k{color:var(--faint)}
+.models span:first-child{font-family:var(--mono)}
+.tag-ok{color:var(--ok)}.tag-bad{color:var(--bad)}.tag-none{color:var(--faint)}
+.card{border:1px solid var(--line2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.bar div{height:4px;background:var(--ok);width:0;transition:width .3s}
+.bar.busy div{width:30%!important;animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{margin-left:-30%}100%{margin-left:100%}}
+.state{display:flex;flex-direction:column;gap:6px}
+.state .big{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:600;letter-spacing:-.01em}
+.lamp{width:10px;height:10px;border-radius:50%;background:var(--dim);flex:0 0 auto}
+.lamp.on{background:var(--ok);box-shadow:0 0 0 4px rgba(61,220,151,.15)}
+.lamp.pause{background:var(--warn)}
+.problem{background:var(--bad-bg);border:1px solid var(--bad-line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.problem b{font-size:13px;color:var(--bad-ink)}
+.problem span{font-size:13px;color:#E6C3C3;overflow-wrap:anywhere}
+.kv{display:flex;flex-direction:column}
+.kv>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.kv>div:last-child{border-bottom:1px solid var(--line)}
+.kv span:first-child{color:var(--faint)}
+.kv span:last-child{text-align:right;overflow-wrap:anywhere}
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.figs div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.figs span{display:block;font-size:12px;color:var(--faint)}
+.figs b{display:block;font-family:var(--mono);font-size:22px;font-weight:400;margin-top:4px}
+.check{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.check input{width:18px;height:18px;accent-color:var(--ok);flex:0 0 auto}
+.jhead{height:44px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.journal{padding:6px 20px 20px;font-family:var(--mono);font-size:12.5px;overflow:auto}
+.jrow{display:grid;grid-template-columns:76px minmax(0,1fr) 130px 64px;gap:12px;padding:9px 0;border-bottom:1px solid #16191E}
+.jrow.h{color:var(--dim);border-bottom-color:var(--line);padding:8px 0}
+.jrow span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jrow span:last-child{text-align:right}
+.jrow i{font-style:normal}
+.k-ok{color:var(--ok)}.k-slow{color:var(--warn)}.k-refused,.k-error{color:var(--bad)}.k-info{color:var(--dim)}
+.empty{padding:24px 0;color:var(--faint);font-family:inherit}
+.nav{width:240px;flex:0 0 240px;padding:24px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.nav a{padding:10px 12px;border-radius:6px;color:var(--muted);text-decoration:none;font-size:14px}
+.nav a:hover{background:var(--panel);color:var(--ink)}
+.nav a.danger{color:var(--bad-ink)}
+.sec{display:flex;flex-direction:column;gap:12px;max-width:680px}
+.zone{border-color:var(--bad-line)}
+.zone>div{border-top-color:#2A1C1F}
+.gone{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px;text-align:center}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.models{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.models:empty{display:none}
-.models li{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 12px;border-top:1px solid var(--line);font-size:14px}
-.models li:first-child{border-top:0}
-.models li span:first-child{flex:1 1 auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;overflow:hidden;text-overflow:ellipsis}
-.badge{padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
-.badge.ok{background:var(--ok-soft);color:var(--ok)}
-.badge.bad{background:var(--bad-soft);color:var(--bad)}
-.badge.none{background:var(--soft);color:var(--muted)}
-details{border:1px dashed var(--line);border-radius:10px;padding:12px 14px}
-details summary{cursor:pointer;font-size:14px;font-weight:600}
-details[open] summary{margin-bottom:10px}
-details .inner{display:flex;flex-direction:column;gap:10px}
-.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.choice{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-.choice .btn{margin-top:auto}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.bar.busy div{width:35%!important;animation:slide 1.2s ease-in-out infinite}
-@keyframes slide{0%{margin-left:-35%}100%{margin-left:100%}}
-.bar{height:6px;border-radius:999px;background:var(--soft);overflow:hidden}
-.bar div{height:100%;width:0;background:var(--accent);transition:width .3s}
-.status{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--soft)}
-.status .big{width:44px;height:44px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--muted)}
-.status.on .big{background:var(--ok);color:#fff}
-.status.paused .big{background:var(--warn);color:#fff}
-.status strong{display:block;font-size:15px}
-.status span{font-size:13px;color:var(--muted)}
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.facts div{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.facts span{display:block;font-size:12px;color:var(--muted)}
-.facts strong{font-size:15px}
-.power{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
-.toggle{display:flex;align-items:center;gap:12px;padding:10px 0 0;border-top:1px solid var(--line)}
-.toggle .grow{flex:1 1 auto}
-.toggle p{margin:0;font-size:12.5px;color:var(--muted)}
-.switch{position:relative;width:42px;height:24px;flex:0 0 auto}
-.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-.switch i{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s;pointer-events:none}
-.switch i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
-.switch input:checked+i{background:var(--ok)}
-.switch input:checked+i::after{transform:translateX(18px)}
-.switch input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
-footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px;padding:0 4px}
 [hidden]{display:none!important}
-@media (max-width:560px){.steps li span{display:none}.steps li.now span{display:inline}.wrap{padding:18px 14px 36px}}
+@media (max-width:760px){.side,.nav{width:100%;flex-basis:100%;border-right:0;border-bottom:1px solid var(--line)}.pad{padding:24px 16px}.jrow{grid-template-columns:64px minmax(0,1fr) 56px}.jrow span:nth-child(3){display:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h4l3-7 2 14 3-7h4"></path></svg></div>
-    <div class="title"><strong>O'So AI Relay</strong><span data-t="ui.tagline"></span></div>
-    <span class="pill" id="pill" role="status"><i></i><span id="pill-text"></span></span>
-    <select id="lang" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FD7B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+      <b>O'So AI Relay</b><span class="ver" id="version"></span>
+    </div>
+    <span id="actions" class="row" hidden>
+      <button class="btn" type="button" data-power="free" data-t="ui.power.free"></button>
+      <button class="btn" type="button" id="pause"></button>
+      <button class="btn danger" type="button" data-power="stop" data-t="ui.power.stop"></button>
+    </span>
+    <button class="btn go" type="button" data-power="start" id="restart" data-t="ui.power.start" hidden></button>
+    <button class="btn" type="button" id="open-settings" data-t="ui.settings" hidden></button>
+    <button class="btn" type="button" id="close-settings" data-t="ui.back" hidden></button>
+    <select id="lang" aria-label="Language"><option value="en">EN</option><option value="fr">FR</option><option value="es">ES</option><option value="de">DE</option></select>
   </header>
 
-  <section class="progress">
-    <div class="track"><div id="track"></div></div>
-    <ol class="steps">
-      <li id="p-shop"><b>1</b><span data-t="ui.progress.shop"></span></li>
-      <li id="p-ai"><b>2</b><span data-t="ui.progress.ai"></span></li>
-      <li id="p-run"><b>3</b><span data-t="ui.progress.run"></span></li>
-    </ol>
-  </section>
-
-  <section class="card" id="c-shop">
-    <div class="head">
-      <span class="num" data-num="1">1</span>
-      <div class="grow"><h2 data-t="ui.shop.title"></h2><p id="shop-sum"></p></div>
-      <button class="btn ghost small" type="button" data-change="c-shop" data-t="ui.change"></button>
-    </div>
-    <form class="body" id="pair-form">
-      <p class="hint" data-t="ui.shop.intro"></p>
-      <p class="msg bad" id="revoked" hidden data-t="ui.shop.revoked"></p>
-      <div class="field"><label for="shop" data-t="ui.shop.address"></label><input id="shop" type="text" inputmode="url" placeholder="https://" autocomplete="off" required></div>
-      <div class="field"><label for="code" data-t="ui.shop.code"></label><input id="code" class="code" type="text" autocomplete="off" placeholder="XXXX-XXXX" required></div>
-      <p class="hint" data-t="ui.shop.paste"></p>
-      <div class="row"><button class="btn primary" type="submit" id="pair-btn" data-t="ui.shop.link"></button><span class="hint" data-t="ui.shop.code_hint"></span></div>
-      <p class="msg" id="pair-msg" role="status"></p>
-    </form>
-  </section>
-
-  <section class="card" id="c-ai">
-    <div class="head">
-      <span class="num" data-num="2">2</span>
-      <div class="grow"><h2 data-t="ui.ai.title"></h2><p id="ai-sum"></p></div>
-      <button class="btn ghost small" type="button" data-change="c-ai" data-t="ui.change"></button>
-    </div>
-    <form class="body" id="ai-form">
-      <p class="hint" data-t="ui.ai.intro"></p>
-      <div class="field">
-        <label for="ai" data-t="ui.ai.address"></label>
-        <div class="row"><input id="ai" type="text" placeholder="http://localhost:11434" autocomplete="off" required><button class="btn primary" type="submit" id="ai-btn"></button></div>
+  <!-- Setup: link the shop, then the AI. -->
+  <div class="body" id="v-setup" hidden>
+    <aside class="side">
+      <span class="label" data-t="ui.setup.title"></span>
+      <div class="steps">
+        <div class="step" id="s1"><span class="dot">1</span><div><span data-t="ui.step.link"></span><small id="s1-sub"></small></div></div>
+        <div class="step" id="s2"><span class="dot">2</span><div><span data-t="ui.step.ai"></span><small id="s2-sub"></small></div></div>
+        <div class="step" id="s3"><span class="dot">3</span><div><span data-t="ui.step.run"></span></div></div>
       </div>
-      <div class="row"><button class="chip" type="button" data-preset="http://localhost:11434">Ollama · 11434</button><button class="chip" type="button" data-preset="http://localhost:1234">LM Studio · 1234</button></div>
-      <p class="hint" data-t="ui.ai.examples"></p>
-      <p class="msg" id="ai-msg" role="status"></p>
-      <ul class="models" id="models"></ul>
-      <p class="hint" data-t="ui.ai.only_tools"></p>
-      <details id="install">
-        <summary data-t="ui.ai.none"></summary>
-        <div class="inner">
-          <p class="hint" data-t="ui.setup.intro"></p>
-          <p class="hint" id="memory"></p>
-          <div class="choices">
-            <div class="choice">
-              <strong>Ollama</strong>
-              <p class="hint" data-t="ui.setup.ollama"></p>
-              <p class="hint mono" id="ollama-model"></p>
-              <button class="btn primary" type="button" data-setup="ollama" data-t="ui.setup.go"></button>
-            </div>
-            <div class="choice">
-              <strong>LM Studio</strong>
-              <p class="hint" data-t="ui.setup.lmstudio"></p>
-              <p class="hint mono" id="lmstudio-model"></p>
-              <button class="btn primary" type="button" data-setup="lmstudio" data-t="ui.setup.go"></button>
-            </div>
+      <div class="figs" id="pc" hidden style="grid-template-columns:1fr"><div><span data-t="ui.pc"></span><b id="pc-mem" style="font-size:14px;font-family:inherit"></b><span id="pc-rec"></span></div></div>
+      <p class="hint" style="margin-top:auto" data-t="ui.network"></p>
+    </aside>
+    <main class="main">
+      <form class="pad" id="link" hidden>
+        <div><h1 data-t="ui.link.title"></h1><p class="sub" data-t="ui.link.intro"></p></div>
+        <div class="field"><label for="cmd" data-t="ui.link.cmd"></label><input id="cmd" type="text" class="mono" autocomplete="off" placeholder="oso pair https://… XXXX-XXXX"></div>
+        <div class="or" data-t="ui.link.or"></div>
+        <div class="grid2">
+          <div class="field"><label for="shop" data-t="ui.link.shop"></label><input id="shop" type="text" placeholder="https://" autocomplete="off"></div>
+          <div class="field"><label for="code" data-t="ui.link.code"></label><input id="code" type="text" class="code" placeholder="XXXX-XXXX" autocomplete="off"></div>
+        </div>
+        <div class="row"><button class="btn go big" type="submit" id="pair-btn" data-t="ui.link.go"></button><span class="hint" data-t="ui.link.hint"></span></div>
+        <p class="msg" id="pair-msg" role="status"></p>
+        <p class="msg bad" id="revoked" hidden data-t="ui.link.revoked"></p>
+      </form>
+
+      <form class="pad" id="ai" hidden>
+        <div><h1 data-t="ui.ai.title2"></h1><p class="sub" data-t="ui.ai.intro2"></p></div>
+        <div class="row"><label for="addr" hidden data-t="ui.ai.address"></label><input id="addr" type="text" class="mono" placeholder="http://localhost:11434" autocomplete="off"><button class="btn big" type="submit" id="test-btn"></button></div>
+        <div class="row"><button class="btn" type="button" data-preset="http://localhost:11434">Ollama · 11434</button><button class="btn" type="button" data-preset="http://localhost:1234">LM Studio · 1234</button></div>
+        <p class="msg" id="ai-msg" role="status"></p>
+        <div class="list models" id="models" hidden></div>
+        <div class="or" data-t="ui.ai.none2"></div>
+        <div class="grid2">
+          <div class="card"><div class="head"><b>Ollama</b><span class="hint" data-t="ui.setup.ollama"></span></div><span class="hint mono" id="rec-ollama"></span><button class="btn" type="button" data-setup="ollama" data-t="ui.setup.go"></button><div class="bar" data-bar="ollama" hidden><div></div></div></div>
+          <div class="card"><div class="head"><b>LM Studio</b><span class="hint" data-t="ui.setup.lmstudio"></span></div><span class="hint mono" id="rec-lmstudio"></span><button class="btn" type="button" data-setup="lmstudio" data-t="ui.setup.go"></button><div class="bar" data-bar="lmstudio" hidden><div></div></div></div>
+        </div>
+        <p class="msg" id="setup-msg" role="status"></p>
+        <p class="hint" data-t="ui.setup.intro"></p>
+      </form>
+    </main>
+  </div>
+
+  <!-- Day to day: the state and the live journal. -->
+  <div class="body" id="v-main" hidden>
+    <aside class="side">
+      <div class="state"><div class="big"><span class="lamp" id="lamp"></span><span id="st-title"></span></div><p class="sub" id="st-text"></p></div>
+      <div class="problem" id="problem" hidden><b data-t="ui.problem"></b><span id="problem-text"></span></div>
+      <p class="msg" id="power-msg" role="status"></p>
+      <div class="kv">
+        <div><span data-t="ui.kv.shop"></span><span id="kv-shop"></span></div>
+        <div><span data-t="ui.kv.address"></span><span class="mono" id="kv-addr" style="font-size:12px"></span></div>
+        <div><span data-t="ui.kv.ai"></span><span id="kv-ai"></span></div>
+        <div><span data-t="ui.kv.model"></span><span class="mono" id="kv-model" style="font-size:12px"></span></div>
+        <div><span data-t="ui.kv.memory"></span><span id="kv-mem"></span></div>
+      </div>
+      <div class="figs"><div><span data-t="ui.fig.today"></span><b id="fig-today"></b></div><div><span data-t="ui.fig.avg"></span><b id="fig-avg"></b></div></div>
+      <div class="check" style="margin-top:auto"><label for="startup" data-t="ui.status.startup"></label><input id="startup" type="checkbox"></div>
+    </aside>
+    <main class="main">
+      <div class="jhead"><b style="font-size:13px" data-t="ui.journal"></b><span class="ver" id="last"></span></div>
+      <div class="journal" id="journal"></div>
+    </main>
+  </div>
+
+  <!-- Settings. -->
+  <div class="body" id="v-settings" hidden>
+    <nav class="nav" aria-label="Settings">
+      <a href="#sec-shop" data-t="ui.set.shop"></a>
+      <a href="#sec-pc" data-t="ui.set.pc"></a>
+      <a href="#sec-remove" class="danger" data-t="ui.set.remove"></a>
+    </nav>
+    <main class="main" style="overflow:auto">
+      <div class="pad">
+        <section class="sec" id="sec-shop">
+          <h2 data-t="ui.set.shop"></h2>
+          <div class="list">
+            <div><span class="k" data-t="ui.kv.shop"></span><span id="set-shop"></span></div>
+            <div><span class="k" data-t="ui.kv.address"></span><span class="mono" id="set-addr" style="font-size:12px"></span></div>
+            <div><span class="k" data-t="ui.kv.ai"></span><span class="mono" id="set-ai" style="font-size:12px"></span></div>
           </div>
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar" hidden><div></div></div>
-          <p class="msg" id="setup-msg" role="status"></p>
-        </div>
-      </details>
-    </form>
-  </section>
+          <div class="row">
+            <button class="btn" type="button" id="relink" data-t="ui.set.relink"></button>
+            <button class="btn" type="button" id="change-ai" data-t="ui.set.changeai"></button>
+            <button class="btn danger" type="button" id="unlink" data-t="ui.status.unlink"></button>
+          </div>
+        </section>
+        <section class="sec" id="sec-pc">
+          <h2 data-t="ui.set.pc"></h2>
+          <div class="list">
+            <div><div><label for="startup2" data-t="ui.status.startup"></label><p class="hint" data-t="ui.run.startup_hint"></p></div><input id="startup2" type="checkbox" style="width:18px;height:18px;accent-color:#3DDC97"></div>
+            <div><div><label for="autofree" data-t="ui.set.autofree"></label><p class="hint" data-t="ui.set.autofree_hint"></p></div><input id="autofree" type="checkbox" style="width:18px;height:18px;accent-color:#3DDC97"></div>
+          </div>
+          <p class="hint mono" id="home"></p>
+        </section>
+        <section class="sec" id="sec-remove">
+          <h2 style="color:var(--bad-ink)" data-t="ui.set.remove"></h2>
+          <div class="list zone" id="remove-list"></div>
+          <p class="msg" id="remove-msg" role="status"></p>
+        </section>
+      </div>
+    </main>
+  </div>
 
-  <section class="card" id="c-run">
-    <div class="head">
-      <span class="num">3</span>
-      <div class="grow"><h2 data-t="ui.run.title"></h2></div>
-      <button class="btn ghost small" type="button" id="pause"></button>
-    </div>
-    <div class="body">
-      <div class="status" id="status">
-        <div class="big"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h4l3-7 2 14 3-7h4"></path></svg></div>
-        <div><strong id="status-title"></strong><span id="status-text"></span></div>
-      </div>
-      <p class="msg bad" id="problem"></p>
-      <div class="facts">
-        <div><span data-t="ui.status.last"></span><strong id="s-last"></strong></div>
-        <div><span data-t="ui.run.answered"></span><strong id="s-answered"></strong></div>
-        <div><span data-t="ui.status.models"></span><strong id="s-models"></strong></div>
-      </div>
-      <div class="power">
-        <p class="hint" data-t="ui.power.hint"></p>
-        <div class="row">
-          <button class="btn ghost small" type="button" data-power="free" data-t="ui.power.free"></button>
-          <button class="btn ghost small" type="button" data-power="stop" data-t="ui.power.stop"></button>
-          <button class="btn ghost small" type="button" data-power="start" data-t="ui.power.start"></button>
-        </div>
-        <p class="msg" id="power-msg" role="status"></p>
-      </div>
-      <div class="toggle">
-        <div class="grow"><label for="startup" data-t="ui.status.startup"></label><p data-t="ui.run.startup_hint"></p></div>
-        <span class="switch"><input id="startup" type="checkbox"><i></i></span>
-      </div>
-      <div class="toggle">
-        <div class="grow"><p data-t="ui.run.danger"></p></div>
-        <button class="btn danger small" type="button" id="unlink" data-t="ui.status.unlink"></button>
-      </div>
-    </div>
-  </section>
-
-  <footer><span data-t="ui.shop.note"></span><span data-t="ui.status.note"></span><span id="version"></span></footer>
+  <div class="gone" id="v-gone" hidden><h1 data-t="ui.gone.title"></h1><p class="sub" data-t="ui.gone.text"></p></div>
 </div>
 <script>
 (function () {
@@ -252,229 +245,226 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
   var token = location.hash.slice(1);
   try { token = token || sessionStorage.getItem('relay-token') || ''; if (location.hash) { sessionStorage.setItem('relay-token', token); } } catch (e) {}
   if (location.hash) { history.replaceState(null, '', '/'); }
-  var texts = {};
-  var state = null;
-  // Models of the last test in this window; the running relay's otherwise.
-  var tested = null;
-  var testing = false;
-  var autoTested = false;
-  var shownSetup = '';
-  // What answered at the address, from the last test or setup here.
-  var software = '';
-  // A card reopened with Change stays open until its step is done again.
-  var opened = {};
+  var texts = {}, state = null, tested = null, software = '', shownSetup = '';
+  var testing = false, autoTested = false, settings = false, step = 0, gone = false;
 
   function t(key) { return texts[key] || key; }
-  function fmt(key) { var args = Array.prototype.slice.call(arguments, 1); var i = 0; return t(key).replace(/%[sd]/g, function () { return String(args[i++]); }); }
+  function fmt(key) { var a = Array.prototype.slice.call(arguments, 1), i = 0; return t(key).replace(/%[sd]/g, function () { return String(a[i++]); }); }
+  function fmtArr(key, args) { return fmt.apply(null, [key].concat(args || [])); }
   function $(id) { return document.getElementById(id); }
-
   function api(path, body) {
-    return fetch(path, {
-      method: body === undefined ? 'GET' : 'POST',
-      headers: { 'X-Relay-Token': token, 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body)
-    }).then(function (r) { return r.json().then(function (j) { if (!r.ok) { throw new Error(j && j.error || r.status); } return j; }); });
+    return fetch(path, { method: body === undefined ? 'GET' : 'POST', headers: { 'X-Relay-Token': token, 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) { throw new Error(j && j.error || r.status); } return j; }); });
   }
-
   function say(id, text, kind) { var el = $(id); el.textContent = text || ''; el.className = 'msg ' + (kind || 'info'); }
-  function busy(button, on, label) {
-    button.disabled = on;
-    button.textContent = '';
-    if (on) { var s = document.createElement('span'); s.className = 'spin'; button.appendChild(s); }
-    button.appendChild(document.createTextNode(label));
-  }
-
+  function busy(b, on, label) { b.disabled = on; b.textContent = ''; if (on) { var s = document.createElement('span'); s.className = 'spin'; b.appendChild(s); } b.appendChild(document.createTextNode(label)); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (text !== undefined) { e.textContent = text; } return e; }
   function models() { return tested || (state && state.relay && state.relay.models) || []; }
-  function toolCount() { return models().filter(function (m) { return m.tools === true; }).length; }
+  function tools() { return models().filter(function (m) { return m.tools === true; }); }
+  // Seconds for the journal and the figures; under a tenth, said as such.
+  function secs(ms) { return ms < 100 ? '< 0.1 s' : (ms / 1000).toLocaleString(state.lang, { maximumFractionDigits: 1 }) + ' s'; }
+  function gb(bytes) { return (bytes / 1073741824).toLocaleString(state.lang, { maximumFractionDigits: 1 }) + ' GB'; }
+  function show(id) { ['v-setup', 'v-main', 'v-settings', 'v-gone'].forEach(function (v) { $(v).hidden = v !== id; }); }
 
   function drawModels() {
-    var list = $('models');
-    list.textContent = '';
+    var list = $('models'); list.textContent = '';
     models().forEach(function (m) {
-      var li = document.createElement('li');
-      var name = document.createElement('span'); name.textContent = m.id;
-      var badge = document.createElement('span');
-      badge.className = 'badge ' + (m.tools === true ? 'ok' : (m.tools === false ? 'bad' : 'none'));
-      badge.textContent = t(m.tools === true ? 'llm.tools_ok' : (m.tools === false ? 'llm.tools_no' : 'llm.tools_untested'));
-      li.appendChild(name); li.appendChild(badge); list.appendChild(li);
+      var row = el('div'); row.appendChild(el('span', '', m.id));
+      row.appendChild(el('span', m.tools === true ? 'tag-ok' : (m.tools === false ? 'tag-bad' : 'tag-none'), t(m.tools === true ? 'llm.tools_ok' : (m.tools === false ? 'llm.tools_no' : 'llm.tools_untested'))));
+      list.appendChild(row);
+    });
+    list.hidden = !models().length;
+  }
+
+  function drawJournal() {
+    var box = $('journal'); box.textContent = '';
+    var head = el('div', 'jrow h');
+    ['ui.j.time', 'ui.j.event', 'ui.j.model', 'ui.j.took'].forEach(function (k) { head.appendChild(el('span', '', t(k))); });
+    box.appendChild(head);
+    var events = (state.relay && state.relay.events) || [];
+    if (!events.length) { box.appendChild(el('div', 'empty', t('ui.j.empty'))); return; }
+    events.forEach(function (e) {
+      var row = el('div', 'jrow');
+      row.appendChild(el('span', 'k-info', new Date(e.at).toLocaleTimeString(state.lang)));
+      var what = el('span'); what.appendChild(el('i', 'k-' + e.kind, '● ')); what.appendChild(document.createTextNode(fmtArr(e.key, e.args)));
+      what.title = what.textContent;
+      row.appendChild(what);
+      row.appendChild(el('span', '', e.model || '-'));
+      row.appendChild(el('span', '', e.ms ? secs(e.ms) : '-'));
+      box.appendChild(row);
     });
   }
 
-  function setCard(id, done) {
-    var card = $(id);
-    if (done && opened[id] === 'done') { delete opened[id]; }
-    card.classList.toggle('done', done);
-    card.classList.toggle('closed', done && !opened[id]);
-    card.querySelector('[data-change]').hidden = !done || !!opened[id];
-    var num = card.querySelector('.num');
-    num.textContent = done ? '✓' : num.getAttribute('data-num');
+  function drawRemove() {
+    var list = $('remove-list'); list.textContent = '';
+    (state.installed || []).forEach(function (kind) {
+      var row = el('div'), info = el('div');
+      info.appendChild(el('div', '', kind === 'ollama' ? 'Ollama' : 'LM Studio'));
+      info.appendChild(el('p', 'hint', t('ui.set.byoso')));
+      var b = el('button', 'btn danger', t('ui.set.uninstall')); b.type = 'button';
+      b.addEventListener('click', function () {
+        if (!window.confirm(fmt('ui.set.confirm_ai', kind === 'ollama' ? 'Ollama' : 'LM Studio'))) { return; }
+        busy(b, true, t('ui.set.uninstall'));
+        api('/api/removeai', { kind: kind }).then(function () { say('remove-msg', fmt('removeai.done', kind), 'ok'); tested = null; return refresh(); })
+          .catch(function (err) { say('remove-msg', fmt('err.generic', err.message), 'bad'); busy(b, false, t('ui.set.uninstall')); });
+      });
+      row.appendChild(info); row.appendChild(b); list.appendChild(row);
+    });
+    var row = el('div'), info = el('div');
+    info.appendChild(el('div', '', "O'So AI Relay"));
+    info.appendChild(el('p', 'hint', t('ui.set.remove_hint')));
+    var withAI = null;
+    if ((state.installed || []).length) {
+      var lab = el('label', 'hint'); lab.style.display = 'flex'; lab.style.gap = '8px'; lab.style.alignItems = 'center';
+      withAI = el('input'); withAI.type = 'checkbox'; withAI.checked = true; withAI.style.accentColor = '#F28B8B';
+      lab.appendChild(withAI); lab.appendChild(document.createTextNode(t('ui.set.with_ai'))); info.appendChild(lab);
+    }
+    var b = el('button', 'btn kill', t('ui.set.remove_all')); b.type = 'button';
+    b.addEventListener('click', function () {
+      if (!window.confirm(t('ui.set.confirm_all'))) { return; }
+      busy(b, true, t('ui.set.remove_all'));
+      api('/api/remove', { ai: withAI ? withAI.checked : false }).then(function () { gone = true; show('v-gone'); $('actions').hidden = $('restart').hidden = $('open-settings').hidden = $('close-settings').hidden = true; })
+        .catch(function (err) { say('remove-msg', fmt('err.generic', err.message), 'bad'); busy(b, false, t('ui.set.remove_all')); });
+    });
+    row.appendChild(info); row.appendChild(b); list.appendChild(row);
   }
 
   function draw() {
+    if (gone) { return; }
     texts = state.texts;
     document.documentElement.lang = state.lang;
-    document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = t(el.getAttribute('data-t')); });
+    document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = t(e.getAttribute('data-t')); });
     $('lang').value = state.lang;
-    $('version').textContent = fmt('ui.version', state.version);
-    if (!$('shop').value && document.activeElement !== $('shop')) { $('shop').value = state.shop.url || ''; }
-    if (!$('ai').value && document.activeElement !== $('ai')) { $('ai').value = state.ai || ''; }
-    $('memory').textContent = state.memory ? fmt('ui.setup.memory', state.memory) : '';
-    $('ollama-model').textContent = state.recommend;
-    $('lmstudio-model').textContent = state.lmstudio;
-    $('revoked').hidden = !state.revoked || state.shop.linked;
+    $('version').textContent = state.version;
 
     var linked = !!state.shop.linked;
-    var ready = !!state.ai && toolCount() > 0;
+    var ready = !!state.ai && tools().length > 0;
     var running = state.carrier !== '' && state.running;
-    var paused = running && state.paused;
+    var paused = !!state.paused;
+    var setup = !linked || !ready || step;
+    var setupStep = step || (!linked ? 1 : 2);
 
-    setCard('c-shop', linked);
-    setCard('c-ai', ready);
-    $('shop-sum').textContent = linked ? fmt('ui.shop.summary', state.shop.name ? state.shop.name + ' · ' + state.shop.url : state.shop.url) : '';
-    $('ai-sum').textContent = ready ? fmt('ui.ai.summary', software || (state.relay && state.relay.software) || 'AI', state.ai, toolCount()) : '';
-    if (!testing) {
-      drawModels();
-      $('ai-btn').textContent = t(models().length ? 'ui.ai.retry' : 'ui.ai.test');
-    }
+    $('actions').hidden = setup || settings || paused;
+    $('restart').hidden = setup || settings || !paused;
+    $('open-settings').hidden = settings || !linked;
+    $('close-settings').hidden = !settings;
+    show(settings ? 'v-settings' : (setup ? 'v-setup' : 'v-main'));
 
-    // Each step lights up once done; the first one not done is the one to
-    // work on.
-    var done = [linked, ready, running && !paused];
-    ['p-shop', 'p-ai', 'p-run'].forEach(function (id, i) {
-      var li = $(id);
-      li.classList.toggle('done', done[i]);
-      li.classList.toggle('now', !done[i] && done.slice(0, i).every(Boolean));
-      li.querySelector('b').textContent = done[i] ? '✓' : String(i + 1);
+    // Setup.
+    [1, 2, 3].forEach(function (n) {
+      var s = $('s' + n), done = (n === 1 && linked) || (n === 2 && ready);
+      s.className = 'step' + (n === setupStep ? ' now' : '') + (done && n !== setupStep ? ' done' : '');
+      s.querySelector('.dot').textContent = done && n !== setupStep ? '✓' : String(n);
     });
-    $('track').style.width = (done.filter(Boolean).length / 3 * 100) + '%';
-
-    var look = paused ? ' paused' : (running ? ' on' : '');
-    var title = t(paused ? 'ui.pill.paused' : (running ? 'ui.pill.active' : 'ui.pill.waiting'));
-    $('pill').className = 'pill' + look;
-    $('pill-text').textContent = title;
-    $('status').className = 'status' + look;
-    $('status-title').textContent = title;
-    $('status-text').textContent = t(paused ? 'ui.run.paused' : (running ? (state.carrier === 'service' ? 'ui.run.service' : 'ui.run.here') : 'ui.run.waiting'));
-    $('problem').textContent = state.problem ? fmt('ui.run.problem', state.problem) : '';
-    var last = state.relay && state.relay.last_contact;
-    $('s-last').textContent = last && last.indexOf('0001') !== 0 ? new Date(last).toLocaleTimeString(state.lang) : t('ui.never');
-    $('s-answered').textContent = String((state.relay && state.relay.answered) || 0);
-    $('s-models').textContent = String(toolCount());
-    $('pause').hidden = !linked;
-    $('pause').textContent = t(state.paused ? 'ui.status.resume' : 'ui.status.pause');
-    $('unlink').disabled = !linked;
-    $('startup').checked = !!state.startup;
-
-    // The setup runs in the relay, which may outlive this tab: the page
-    // only draws where it stands.
-    var setup = state.setup || {};
-    var installing = !!setup.running;
+    $('s1-sub').textContent = linked ? (state.shop.name || state.shop.url) : '';
+    $('s2-sub').textContent = ready ? (software || (state.relay && state.relay.software) || '') : '';
+    $('link').hidden = setupStep !== 1;
+    $('ai').hidden = setupStep !== 2;
+    $('pc').hidden = setupStep !== 2 || !state.memory;
+    $('pc-mem').textContent = state.memory ? fmt('ui.pc.mem', state.memory) : '';
+    $('pc-rec').textContent = fmt('ui.pc.rec', state.recommend);
+    $('rec-ollama').textContent = state.recommend;
+    $('rec-lmstudio').textContent = state.lmstudio;
+    $('revoked').hidden = !state.revoked || linked;
+    if (!$('shop').value && document.activeElement !== $('shop')) { $('shop').value = state.shop.url || ''; }
+    if (!$('addr').value && document.activeElement !== $('addr')) { $('addr').value = state.ai || ''; }
+    if (!testing) { drawModels(); $('test-btn').textContent = t(models().length ? 'ui.ai.retry' : 'ui.ai.test'); }
+    var su = state.setup || {}, installing = !!su.running;
     document.querySelectorAll('[data-setup]').forEach(function (b) { b.disabled = installing; });
-    $('bar').hidden = !setup.key;
-    $('bar').classList.toggle('busy', installing && setup.percent < 0);
-    $('bar').firstElementChild.style.width = (setup.done ? 100 : Math.max(0, setup.percent || 0)) + '%';
-    if (setup.key) {
-      say('setup-msg', fmt.apply(null, [setup.key].concat(setup.args || [])), setup.done ? 'ok' : (installing ? 'info' : 'bad'));
-      if (installing) { $('install').open = true; }
-    }
-    if (setup.done && setup.address && setup.address !== shownSetup) {
-      // Done: the address and its tested models, as after a Test.
-      shownSetup = setup.address;
-      $('ai').value = setup.address;
-      tested = setup.models || [];
-      software = setup.software || '';
-    }
+    document.querySelectorAll('[data-bar]').forEach(function (bar) {
+      var mine = su.kind === bar.getAttribute('data-bar') && (installing || su.done);
+      bar.hidden = !mine; bar.classList.toggle('busy', installing && su.percent < 0);
+      bar.firstElementChild.style.width = (su.done ? 100 : Math.max(0, su.percent || 0)) + '%';
+    });
+    if (su.key) { say('setup-msg', fmtArr(su.key, su.args), su.done ? 'ok' : (installing ? 'info' : 'bad')); }
+    if (su.done && su.address && su.address !== shownSetup) { shownSetup = su.address; $('addr').value = su.address; tested = su.models || []; software = su.software || ''; }
+    if (!autoTested && linked && state.ai && !ready && !testing && setupStep === 2) { autoTested = true; testAI(); }
 
-    // The first check runs on its own: an address already saved is tested
-    // once when the window opens; after that, Test again is the button.
-    if (!autoTested && linked && state.ai && !ready && !testing) { autoTested = true; testAI(); }
+    // Day to day.
+    var title = paused ? 'ui.st.paused' : (running ? 'ui.st.on' : 'ui.st.waiting');
+    $('lamp').className = 'lamp' + (paused ? ' pause' : (running ? ' on' : ''));
+    $('st-title').textContent = t(title);
+    $('st-text').textContent = t(paused ? 'ui.st.paused_text' : (running ? (state.carrier === 'service' ? 'ui.run.service' : 'ui.st.on_text') : 'ui.run.waiting'));
+    $('problem').hidden = !state.problem;
+    $('problem-text').textContent = state.problem || '';
+    $('kv-shop').textContent = state.shop.name || '-';
+    $('kv-addr').textContent = (state.shop.url || '').replace(/^https?:\/\//, '');
+    $('kv-ai').textContent = (software || (state.relay && state.relay.software) || '-') + (paused ? ' · ' + t('ui.kv.closed') : '');
+    var events = (state.relay && state.relay.events) || [], used = '';
+    for (var i = 0; i < events.length; i++) { if (events[i].model) { used = events[i].model; break; } }
+    $('kv-model').textContent = used || tools().map(function (m) { return m.id; }).join(', ') || '-';
+    $('kv-mem').textContent = state.usedKnown ? gb(state.used) : '-';
+    var r = state.relay || {}, today = r.day === new Date().toISOString().slice(0, 10) ? r.today : 0;
+    $('fig-today').textContent = String(today || 0);
+    $('fig-avg').textContent = today ? secs(r.today_ms / today) : '-';
+    $('last').textContent = r.last_contact && r.last_contact.indexOf('0001') !== 0 ? fmt('ui.j.last', new Date(r.last_contact).toLocaleTimeString(state.lang)) : '';
+    $('pause').textContent = t('ui.status.pause');
+    $('startup').checked = $('startup2').checked = !!state.startup;
+    drawJournal();
+
+    // Settings.
+    $('set-shop').textContent = state.shop.name || '-';
+    $('set-addr').textContent = state.shop.url || '-';
+    $('set-ai').textContent = state.ai || '-';
+    $('autofree').checked = !state.keep;
+    $('home').textContent = state.home ? fmt('ui.set.home', state.home) : '';
+    if (settings && !document.querySelector('#remove-list button:disabled')) { drawRemove(); }
   }
 
   function refresh() { return api('/api/state').then(function (s) { state = s; draw(); }).catch(function () {}); }
 
   function pair() {
-    var button = $('pair-btn');
-    busy(button, true, t('ui.working'));
-    say('pair-msg', '');
+    var b = $('pair-btn'); busy(b, true, t('ui.working')); say('pair-msg', '');
     api('/api/pair', { shop: $('shop').value.trim(), code: $('code').value.trim() })
-      .then(function (info) {
-        say('pair-msg', fmt('ui.shop.linked', info.name + ' (PrestaShop ' + info.version + ')'), 'ok');
-        $('code').value = '';
-        opened['c-shop'] = 'done';
-        return refresh();
-      })
+      .then(function (info) { say('pair-msg', fmt('ui.shop.linked', info.name), 'ok'); $('code').value = ''; $('cmd').value = ''; step = 0; return refresh(); })
       .catch(function (err) { say('pair-msg', fmt('err.generic', err.message), 'bad'); })
-      .then(function () { busy(button, false, t('ui.shop.link')); });
+      .then(function () { busy(b, false, t('ui.link.go')); });
   }
-
   function testAI() {
-    var button = $('ai-btn');
-    testing = true;
-    busy(button, true, t('ui.working'));
-    say('ai-msg', '');
-    api('/api/ai', { address: $('ai').value.trim() })
-      .then(function (r) {
-        tested = r.models;
-        software = r.software;
-        if (toolCount()) {
-          say('ai-msg', r.software + ' - ' + fmt('ui.ai.found', r.models.length), 'ok');
-        } else {
-          say('ai-msg', t('ui.ai.no_tools'), 'bad');
-          $('install').open = true;
-        }
-        opened['c-ai'] = 'done';
-      })
-      .catch(function (err) { tested = []; say('ai-msg', fmt('ai.fail', $('ai').value, err.message), 'bad'); })
+    var b = $('test-btn'); testing = true; busy(b, true, t('ui.working')); say('ai-msg', '');
+    api('/api/ai', { address: $('addr').value.trim() })
+      .then(function (r) { tested = r.models; software = r.software; say('ai-msg', tools().length ? r.software + ' - ' + fmt('ui.ai.found', r.models.length) : t('ui.ai.no_tools'), tools().length ? 'ok' : 'bad'); if (tools().length) { step = 0; } })
+      .catch(function (err) { tested = []; say('ai-msg', fmt('ai.fail', $('addr').value, err.message), 'bad'); })
       .then(function () { testing = false; return refresh(); })
-      .then(function () { busy(button, false, t(models().length ? 'ui.ai.retry' : 'ui.ai.test')); });
+      .then(function () { busy(b, false, t(models().length ? 'ui.ai.retry' : 'ui.ai.test')); });
   }
-
-  // The back office shows a ready command: pasted into either field, it
-  // fills both and links at once.
-  function takeCommand(event) {
-    var m = /pair\s+(\S+)\s+([A-Za-z0-9]{4}-?[A-Za-z0-9]{4})/.exec(event.target.value);
+  function takeCommand(e) {
+    var m = /pair\s+(\S+)\s+([A-Za-z0-9]{4}-?[A-Za-z0-9]{4})/.exec(e.target.value);
     if (!m) { return; }
-    $('shop').value = m[1];
-    $('code').value = m[2].toUpperCase();
-    pair();
+    $('shop').value = m[1]; $('code').value = m[2].toUpperCase(); pair();
   }
-  $('shop').addEventListener('input', takeCommand);
-  $('code').addEventListener('input', takeCommand);
 
-  document.querySelectorAll('[data-change]').forEach(function (b) {
-    b.addEventListener('click', function () { opened[b.getAttribute('data-change')] = true; draw(); });
-  });
-  document.querySelectorAll('[data-preset]').forEach(function (b) {
-    b.addEventListener('click', function () { $('ai').value = b.getAttribute('data-preset'); testAI(); });
-  });
-  $('lang').addEventListener('change', function () { api('/api/lang', { lang: $('lang').value }).then(refresh); });
-  $('pair-form').addEventListener('submit', function (e) { e.preventDefault(); pair(); });
-  $('ai-form').addEventListener('submit', function (e) { e.preventDefault(); testAI(); });
+  $('cmd').addEventListener('input', takeCommand);
+  $('shop').addEventListener('input', takeCommand);
+  $('link').addEventListener('submit', function (e) { e.preventDefault(); pair(); });
+  $('ai').addEventListener('submit', function (e) { e.preventDefault(); testAI(); });
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { $('addr').value = b.getAttribute('data-preset'); testAI(); }); });
   document.querySelectorAll('[data-setup]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      api('/api/setup', { kind: b.getAttribute('data-setup') }).then(refresh)
-        .catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); });
-    });
+    b.addEventListener('click', function () { api('/api/setup', { kind: b.getAttribute('data-setup') }).then(refresh).catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); }); });
   });
   document.querySelectorAll('[data-power]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var all = document.querySelectorAll('[data-power]');
-      all.forEach(function (x) { x.disabled = true; });
-      busy(b, true, t(b.getAttribute('data-t')));
+      var all = document.querySelectorAll('[data-power]'); all.forEach(function (x) { x.disabled = true; });
       say('power-msg', t('ui.working'), 'info');
-      api('/api/power', { action: b.getAttribute('data-power') })
-        .then(function (r) { say('power-msg', r.message, 'ok'); })
+      api('/api/power', { action: b.getAttribute('data-power') }).then(function (r) { say('power-msg', r.message, 'ok'); })
         .catch(function (err) { say('power-msg', fmt('err.generic', err.message), 'bad'); })
-        .then(function () {
-          all.forEach(function (x) { x.disabled = false; });
-          busy(b, false, t(b.getAttribute('data-t')));
-          return refresh();
-        });
+        .then(function () { all.forEach(function (x) { x.disabled = false; }); return refresh(); });
     });
   });
-  $('pause').addEventListener('click', function () { api('/api/pause', { paused: !state.paused }).then(refresh); });
-  $('startup').addEventListener('change', function () { api('/api/startup', { on: $('startup').checked }).then(refresh).catch(function (err) { alert(err.message); refresh(); }); });
-  $('unlink').addEventListener('click', function () { api('/api/unlink', {}).then(function () { opened = {}; tested = null; return refresh(); }); });
+  $('pause').addEventListener('click', function () { api('/api/pause', { paused: true }).then(refresh); });
+  $('lang').addEventListener('change', function () { api('/api/lang', { lang: $('lang').value }).then(refresh); });
+  function setStartup(on) { api('/api/startup', { on: on }).then(refresh).catch(function (err) { alert(err.message); refresh(); }); }
+  $('startup').addEventListener('change', function () { setStartup($('startup').checked); });
+  $('startup2').addEventListener('change', function () { setStartup($('startup2').checked); });
+  $('autofree').addEventListener('change', function () { api('/api/keep', { keep: !$('autofree').checked }).then(refresh); });
+  $('open-settings').addEventListener('click', function () { settings = true; draw(); });
+  $('close-settings').addEventListener('click', function () { settings = false; draw(); });
+  $('relink').addEventListener('click', function () { settings = false; step = 1; draw(); });
+  $('change-ai').addEventListener('click', function () { settings = false; step = 2; tested = null; draw(); });
+  $('unlink').addEventListener('click', function () {
+    if (!window.confirm(t('ui.run.danger'))) { return; }
+    api('/api/unlink', {}).then(function () { settings = false; step = 0; tested = null; return refresh(); });
+  });
 
   refresh();
   setInterval(refresh, 3000);

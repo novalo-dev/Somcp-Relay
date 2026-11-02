@@ -64,11 +64,13 @@ oso llm setup ollama|lmstudio  install a local AI and a model
 oso llm list                   list your AI's models
 oso llm test [model]           check that a model can call tools
 oso llm install <model>        download a model into Ollama
+oso llm remove ollama|lmstudio uninstall an AI oso installed, with its models
 oso run                        run the relay in this window
 oso install / uninstall        start, or stop starting, with the computer
 oso start / stop               start or stop the background relay
 oso status                     show the shop, the AI and the relay
 oso addtopath                  install oso for your account, on your PATH
+oso remove [--keep-ai]         uninstall oso (and the AIs it installed)
 oso version | help
 ```
 

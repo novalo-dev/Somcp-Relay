@@ -34,6 +34,12 @@ type State struct {
 	LastContact time.Time   `json:"last_contact"`
 	Answered    int         `json:"answered"`
 	LastAnswer  string      `json:"last_answer,omitempty"`
+	// Day, Today and TodayMs give the requests answered today and their
+	// total time, for the interface's figures.
+	Day     string  `json:"day,omitempty"`
+	Today   int     `json:"today"`
+	TodayMs int64   `json:"today_ms"`
+	Events  []Event `json:"events,omitempty"`
 }
 
 // StatePath is the state file beside the settings.
@@ -165,6 +171,10 @@ func Run(ctx context.Context, log Logger) error {
 	}
 
 	state := State{PID: os.Getpid(), Shop: cfg.ShopName, AI: ai.Base()}
+	// The journal and the day's figures carry on from the last run.
+	if old, err := ReadState(); err == nil {
+		state.Events, state.Day, state.Today, state.TodayMs = old.Events, old.Day, old.Today, old.TodayMs
+	}
 	state.Software = Software(ctx, ai.Base())
 	state.Models, err = recentDiscovery(ctx, ai)
 	if err != nil {
@@ -176,8 +186,14 @@ func Run(ctx context.Context, log Logger) error {
 		return err
 	}
 	state.LastContact = time.Now()
+	state.note(Event{Kind: "info", Key: "ev.started"})
 	writeState(state)
 	log.Started(state.Shop, ai.Base())
+
+	// The model is freed after a while without work, unless the user keeps
+	// it loaded: an idle assistant should not slow the computer down.
+	lastWork := time.Now()
+	freed := false
 
 	wait := 5 * time.Second
 	wasPaused := false
@@ -207,6 +223,8 @@ func Run(ctx context.Context, log Logger) error {
 				break
 			}
 			log.Retry(err, wait)
+			state.note(Event{Kind: "error", Key: "ev.shop_down", Args: []any{wait.String()}})
+			writeState(state)
 			sleep(ctx, wait)
 			if wait < time.Minute {
 				wait *= 2
@@ -217,6 +235,13 @@ func Run(ctx context.Context, log Logger) error {
 		state.LastContact = time.Now()
 		writeState(state)
 		if job == nil {
+			if !cfg.KeepLoaded && !freed && time.Since(lastWork) > FreeAfter {
+				if llm.Free(ctx, cfg.AIURL) == nil {
+					state.note(Event{Kind: "info", Key: "ev.freed"})
+					writeState(state)
+				}
+				freed = true
+			}
 			// Nobody is chatting: the shop asked for a pause rather than
 			// keeping one of its PHP processes busy with this call.
 			if idle > 0 {
@@ -226,28 +251,55 @@ func Run(ctx context.Context, log Logger) error {
 		}
 
 		started := time.Now()
-		answerJob(ctx, client, ai, state.Models, job)
+		event := answerJob(ctx, client, ai, state.Models, job)
+		took := time.Since(started)
+		lastWork, freed = time.Now(), false
 		state.Answered++
-		state.LastAnswer = time.Since(started).Round(100 * time.Millisecond).String()
+		state.LastAnswer = took.Round(100 * time.Millisecond).String()
 		state.LastContact = time.Now()
+		if event.Kind == "ok" {
+			state.count(took)
+			if took > slowAnswer {
+				event.Kind = "slow"
+			}
+		}
+		event.Ms = took.Milliseconds()
+		state.note(event)
 		writeState(state)
-		log.Answered(time.Since(started))
+		log.Answered(took)
 	}
 	return nil
 }
 
-func answerJob(ctx context.Context, client *shop.Client, ai *llm.Client, models []llm.Model, job *shop.Job) {
+// FreeAfter is how long the model stays in memory without a request.
+const FreeAfter = 15 * time.Minute
+
+// answerJob passes one request to the AI and its answer to the shop, and
+// says how it went, for the journal.
+func answerJob(ctx context.Context, client *shop.Client, ai *llm.Client, models []llm.Model, job *shop.Job) Event {
+	event := Event{Model: requestModel(job.Request)}
 	request, err := Check(job.Request, models)
 	if err != nil {
 		_ = client.Result(ctx, job.ID, http.StatusBadRequest, nil, err.Error())
-		return
+		event.Kind, event.Key, event.Args = "refused", "ev.refused", []any{err.Error()}
+		return event
 	}
 	status, answer, err := ai.Chat(ctx, request)
 	if err != nil {
 		_ = client.Result(ctx, job.ID, http.StatusBadGateway, nil, err.Error())
-		return
+		event.Kind, event.Key, event.Args = "error", "ev.ai_error", []any{err.Error()}
+		return event
 	}
 	_ = client.Result(ctx, job.ID, status, answer, "")
+	if status < 200 || status >= 300 {
+		event.Kind, event.Key, event.Args = "error", "ev.ai_error", []any{fmt.Sprintf("HTTP %d", status)}
+		return event
+	}
+	event.Kind, event.Key = "ok", "ev.answered"
+	if n := toolCalls(answer); n > 0 {
+		event.Key, event.Args = "ev.answered_tools", []any{n}
+	}
+	return event
 }
 
 // Check accepts a chat request only for a model the relay reported as able

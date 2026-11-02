@@ -26,6 +26,13 @@ type Config struct {
 	Lang string `json:"lang,omitempty"`
 	// Paused stops answering the shop without unlinking it.
 	Paused bool `json:"paused,omitempty"`
+	// KeepLoaded keeps the model in memory between requests. Off by
+	// default: after 15 minutes without a request the relay frees it, so
+	// an idle assistant does not slow the computer down.
+	KeepLoaded bool `json:"keep_loaded,omitempty"`
+	// Installed lists the AIs the relay installed itself (ollama,
+	// lmstudio): only those may it uninstall.
+	Installed []string `json:"installed,omitempty"`
 }
 
 // Dir is the relay's folder in the user's configuration folder.

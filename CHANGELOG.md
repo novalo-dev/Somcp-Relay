@@ -1,6 +1,27 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - 2026-11-02
+
+### Added
+
+**A new interface.** Setting up shows the steps on the left - link the shop,
+your AI, running - with one screen each: paste the back office command, then
+test your AI or install Ollama or LM Studio in one click. Once running, the
+screen shows the relay's state, the shop, the AI, the model and the memory it
+takes, the requests of the day and their average time, and a **live journal**
+of every request: answered, slow, refused, and why. The buttons to free the
+memory, pause or stop everything sit at the top; when stopped, **Start
+everything** brings it all back.
+
+**The memory is freed after 15 minutes without a request**, so an idle
+assistant no longer slows the computer down; the next question loads the
+model again. It can be turned off in the settings.
+
+**Uninstall from the relay.** The settings uninstall an AI the relay installed
+itself, with its models, and O'So AI Relay itself: off the startup and the
+PATH, its copy and settings deleted, and the AIs it installed too if you
+leave the box ticked. From the command line: `oso llm remove ollama`,
+`oso remove`.
 
 ### Changed
 

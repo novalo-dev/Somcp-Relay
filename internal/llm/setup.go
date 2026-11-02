@@ -47,31 +47,35 @@ type Progress struct {
 var ErrNeedsZstd = errors.New("zstd missing")
 
 // Setup installs and starts the AI of the given kind, then downloads the
-// recommended model. It returns the address of the AI.
-func Setup(ctx context.Context, kind string, memoryGB int, report func(Progress)) (string, error) {
+// recommended model. It returns the address of the AI, and whether it
+// installed the AI itself - one already there is not the relay's to
+// uninstall later.
+func Setup(ctx context.Context, kind string, memoryGB int, report func(Progress)) (string, bool, error) {
 	switch kind {
 	case KindOllama:
 		return setupOllama(ctx, memoryGB, report)
 	case KindLMStudio:
 		return setupLMStudio(ctx, memoryGB, report)
 	}
-	return "", fmt.Errorf("unknown AI %q", kind)
+	return "", false, fmt.Errorf("unknown AI %q", kind)
 }
 
-func setupOllama(ctx context.Context, memoryGB int, report func(Progress)) (string, error) {
+func setupOllama(ctx context.Context, memoryGB int, report func(Progress)) (string, bool, error) {
 	base, _ := Normalize(OllamaAddress)
+	installed := false
 	if !OllamaAnswers(ctx, base) {
 		if err := installOllama(ctx, report); err != nil {
-			return "", err
+			return "", false, err
 		}
+		installed = true
 		report(Progress{Key: "setup.start_app", Args: []any{"Ollama"}, Percent: -1})
 		if !waitFor(ctx, func() bool { return OllamaAnswers(ctx, base) }, 20*time.Second) {
 			// The app did not start the server on its own: start it.
 			if err := startOllama(); err != nil {
-				return "", err
+				return "", installed, err
 			}
 			if !waitFor(ctx, func() bool { return OllamaAnswers(ctx, base) }, 60*time.Second) {
-				return "", errors.New("Ollama was installed but does not answer")
+				return "", installed, errors.New("Ollama was installed but does not answer")
 			}
 		}
 	}
@@ -81,7 +85,7 @@ func setupOllama(ctx context.Context, memoryGB int, report func(Progress)) (stri
 	err := Pull(ctx, base, model, func(p int) {
 		report(Progress{Key: "setup.download_model", Args: []any{model, p}, Percent: p})
 	})
-	return OllamaAddress, err
+	return OllamaAddress, installed, err
 }
 
 // installOllama runs Ollama's own installer, the way its install scripts
@@ -179,38 +183,39 @@ func startOllama() error {
 	return cmd.Start()
 }
 
-func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (string, error) {
+func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (string, bool, error) {
 	lms := lmsPath()
+	installed := lms == ""
 	if lms == "" {
 		dir, err := setupDir()
 		if err != nil {
-			return "", err
+			return "", installed, err
 		}
 		// LM Studio's documented install of its headless core, llmster,
 		// for this account only.
 		if runtime.GOOS == "windows" {
 			script := filepath.Join(dir, "lmstudio-install.ps1")
 			if err := download(ctx, "https://lmstudio.ai/install.ps1", script, "LM Studio", report); err != nil {
-				return "", err
+				return "", installed, err
 			}
 			defer os.Remove(script)
 			report(Progress{Key: "setup.install_app", Args: []any{"LM Studio"}, Percent: -1})
 			if err := runHidden(ctx, "powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script); err != nil {
-				return "", err
+				return "", installed, err
 			}
 		} else {
 			script := filepath.Join(dir, "lmstudio-install.sh")
 			if err := download(ctx, "https://lmstudio.ai/install.sh", script, "LM Studio", report); err != nil {
-				return "", err
+				return "", installed, err
 			}
 			defer os.Remove(script)
 			report(Progress{Key: "setup.install_app", Args: []any{"LM Studio"}, Percent: -1})
 			if err := runHidden(ctx, "bash", script); err != nil {
-				return "", err
+				return "", installed, err
 			}
 		}
 		if lms = lmsPath(); lms == "" {
-			return "", errors.New("LM Studio was installed but its lms command is missing")
+			return "", installed, errors.New("LM Studio was installed but its lms command is missing")
 		}
 	}
 
@@ -220,10 +225,10 @@ func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (st
 		report(Progress{Key: "setup.start_app", Args: []any{"LM Studio"}, Percent: -1})
 		_ = runHidden(ctx, lms, "daemon", "up")
 		if err := runHidden(ctx, lms, "server", "start", "--port", "1234"); err != nil {
-			return "", err
+			return "", installed, err
 		}
 		if !waitFor(ctx, func() bool { _, err := ai.Models(ctx); return err == nil }, 60*time.Second) {
-			return "", errors.New("LM Studio was installed but does not answer")
+			return "", installed, errors.New("LM Studio was installed but does not answer")
 		}
 	}
 
@@ -240,7 +245,7 @@ func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (st
 			}
 		}
 	}, lms, "get", source, "--yes")
-	return LMStudioAddress, err
+	return LMStudioAddress, installed, err
 }
 
 // RecommendLMStudio picks the same family as Recommend, from LM Studio's

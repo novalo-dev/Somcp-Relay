@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os/exec"
 	"strings"
+	"syscall"
 	"unicode/utf16"
 )
 
@@ -36,4 +37,29 @@ func add(dir string) (bool, error) {
 		return false, errors.New(strings.TrimSpace(string(out)) + " " + err.Error())
 	}
 	return false, nil
+}
+
+// remove takes the folder out of the user's Path.
+func remove(dir string) error {
+	quoted := "'" + strings.ReplaceAll(dir, "'", "''") + "'"
+	script := "$d = " + quoted + "; " +
+		"$p = [Environment]::GetEnvironmentVariable('Path', 'User'); " +
+		"if (-not $p) { exit 0 }; " +
+		"$kept = ($p -split ';') | Where-Object { $_ -and ($_ -ne $d) }; " +
+		"[Environment]::SetEnvironmentVariable('Path', ($kept -join ';'), 'User')"
+	units := utf16.Encode([]rune(script))
+	raw := make([]byte, len(units)*2)
+	for i, u := range units {
+		raw[i*2], raw[i*2+1] = byte(u), byte(u>>8)
+	}
+	out, err := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw)).CombinedOutput()
+	if err != nil {
+		return errors.New(strings.TrimSpace(string(out)) + " " + err.Error())
+	}
+	return nil
+}
+
+// hideAndDetach runs a command without a window, outliving the relay.
+func hideAndDetach(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000 | syscall.CREATE_NEW_PROCESS_GROUP}
 }

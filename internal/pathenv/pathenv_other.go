@@ -4,6 +4,7 @@ package pathenv
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -53,3 +54,32 @@ func add(dir string) (bool, error) {
 	_, err = f.WriteString("\n" + line + "\n")
 	return false, err
 }
+
+// remove takes out the lines addtopath wrote, recognised by their marker,
+// from every startup file it may have written to.
+func remove(string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	for _, name := range []string{".profile", ".zshrc", ".bashrc", ".bash_profile", filepath.Join(".config", "fish", "config.fish")} {
+		file := filepath.Join(home, name)
+		data, err := os.ReadFile(file)
+		if err != nil || !strings.Contains(string(data), marker) {
+			continue
+		}
+		var kept []string
+		for _, line := range strings.Split(string(data), "\n") {
+			if !strings.Contains(line, marker) {
+				kept = append(kept, line)
+			}
+		}
+		if err := os.WriteFile(file, []byte(strings.Join(kept, "\n")), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// hideAndDetach is only needed on Windows.
+func hideAndDetach(*exec.Cmd) {}
