@@ -8,44 +8,29 @@ no API key to pay for.
 ## Install
 
 1. Download the archive for your system from the
-   [latest release](https://github.com/novalo-dev/Somcp-Relay/releases/latest)
-   and extract it.
-2. In a terminal opened in the extracted folder, run `addtopath`: it installs
-   `oso` for your account and puts it on your PATH. The downloaded files can
-   be deleted afterwards.
-3. Open a new terminal and run `oso ui`.
+   [latest release](https://github.com/novalo-dev/Somcp-Relay/releases/latest):
+   `windows-x64` (or `windows-arm64`), `macos-apple-silicon` (or
+   `macos-intel`), `linux-x64` (or `linux-arm64`).
+2. Extract the archive.
+3. Open a command window: Command Prompt or PowerShell on Windows, Terminal on
+   macOS and Linux.
+4. Go to the extracted folder and install `oso` for your account:
 
-**Windows** - `oso-ai-relay-windows-x64.zip` (`windows-arm64` for ARM PCs).
-Right-click the archive, **Extract All**, then in PowerShell:
+   ```
+   cd <path to the extracted folder>
+   oso.exe addtopath      (Windows)
+   ./oso addtopath        (macOS, Linux)
+   ```
 
-```
-cd $HOME\Downloads\oso-ai-relay-windows-x64
-.\oso.exe addtopath
-```
+   On macOS, run `xattr -d com.apple.quarantine oso` first. On Windows, if
+   SmartScreen warns: **More info**, then **Run anyway**.
+5. Open a new command window and run:
 
-If SmartScreen warns: **More info**, then **Run anyway**. Then, in a new
-PowerShell window: `oso ui`.
+   ```
+   oso ui
+   ```
 
-**macOS** - `oso-ai-relay-macos-apple-silicon.zip` (M1 and later) or
-`oso-ai-relay-macos-intel.zip`. Double-click the archive, then in Terminal:
-
-```
-cd ~/Downloads
-xattr -d com.apple.quarantine oso
-./oso addtopath
-```
-
-Then, in a new Terminal window: `oso ui`.
-
-**Linux** - `oso-ai-relay-linux-x64.tar.gz` (`linux-arm64` for ARM):
-
-```
-mkdir oso && tar -xzf oso-ai-relay-linux-x64.tar.gz -C oso
-cd oso
-./oso addtopath
-```
-
-Then, in a new terminal: `oso ui`.
+The downloaded files can then be deleted.
 
 ## Then follow the steps on screen
 
