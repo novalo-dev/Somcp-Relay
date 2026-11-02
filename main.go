@@ -201,10 +201,18 @@ func llmCommand(ctx context.Context, args []string) error {
 	}
 	// setup needs no AI yet: it is how one gets installed.
 	if len(args) >= 1 && args[0] == "setup" {
-		if len(args) != 2 {
-			return usage("oso llm setup ollama|lmstudio")
+		if len(args) != 2 && len(args) != 3 {
+			return usage("oso llm setup ollama|lmstudio [1.5b|3b|7b|14b]")
 		}
-		address, installed, err := llm.Setup(ctx, args[1], llm.MemoryGB(), func(p llm.Progress) {
+		// No size given: the one recommended for this computer's memory.
+		size := ""
+		if len(args) == 3 {
+			size = strings.ToLower(args[2])
+			if !llm.ValidSize(size) {
+				return usage("oso llm setup ollama|lmstudio [1.5b|3b|7b|14b]")
+			}
+		}
+		address, installed, err := llm.Setup(ctx, args[1], size, func(p llm.Progress) {
 			fmt.Printf("\r%s", i18n.T(p.Key, p.Args...))
 		})
 		fmt.Println()

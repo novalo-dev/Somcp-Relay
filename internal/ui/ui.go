@@ -166,12 +166,13 @@ func (s *Server) state(r *http.Request) (any, error) {
 		"startup":   service.Installed(),
 		"memory":    memory,
 		"recommend": llm.Recommend(memory),
+		"sizes":     llm.Sizes,
+		"size":      llm.RecommendSize(memory),
 		"installed": cfg.Installed,
 		"keep":      cfg.KeepLoaded,
 		"used":      used,
 		"usedKnown": usedKnown,
 		"home":      home,
-		"lmstudio":  lmModel(memory),
 		"setup":     setup,
 	}, nil
 }
@@ -260,12 +261,17 @@ func (s *Server) startup(r *http.Request) (any, error) {
 func (s *Server) startSetup(r *http.Request) (any, error) {
 	var in struct {
 		Kind string `json:"kind"`
+		Size string `json:"size"`
 	}
 	if err := decode(r, &in); err != nil {
 		return nil, err
 	}
 	if in.Kind != llm.KindOllama && in.Kind != llm.KindLMStudio {
 		return nil, errors.New("unknown AI")
+	}
+	// Empty means the recommended size; anything else must be one offered.
+	if in.Size != "" && !llm.ValidSize(in.Size) {
+		return nil, errors.New("unknown model size")
 	}
 	s.mu.Lock()
 	if running, _ := s.setup["running"].(bool); running {
@@ -282,7 +288,7 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 			s.setup = map[string]any{"kind": in.Kind, "running": true, "key": p.Key, "args": p.Args, "percent": p.Percent}
 			s.mu.Unlock()
 		}
-		address, installed, err := llm.Setup(ctx, in.Kind, llm.MemoryGB(), report)
+		address, installed, err := llm.Setup(ctx, in.Kind, in.Size, report)
 		if installed {
 			_ = app.RememberInstalled(in.Kind)
 		}
@@ -307,11 +313,6 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 		s.mu.Unlock()
 	}()
 	return nil, nil
-}
-
-func lmModel(memory int) string {
-	name, _ := llm.RecommendLMStudio(memory)
-	return name
 }
 
 // power frees, stops or starts the local AI, and says how it went in the

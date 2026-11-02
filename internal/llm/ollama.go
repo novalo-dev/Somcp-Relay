@@ -108,16 +108,49 @@ func ValidModelName(name string) bool {
 	return true
 }
 
-// Recommend picks a model that calls tools well and fits the memory.
-func Recommend(memoryGB int) string {
+// Size is one model the setup offers: Qwen2.5 calls tools well at every
+// size, so the merchant only weighs answers against memory. Memory is
+// roughly what the model takes once loaded, in GB.
+type Size struct {
+	Name   string `json:"name"`
+	Memory int    `json:"memory"`
+}
+
+// Sizes are the models the setup offers, smallest first.
+var Sizes = []Size{{"1.5b", 1}, {"3b", 2}, {"7b", 5}, {"14b", 9}}
+
+// ValidSize says whether a size is one the setup offers.
+func ValidSize(name string) bool {
+	for _, s := range Sizes {
+		if s.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// RecommendSize picks the size that fits the memory with room left for the
+// rest of the computer. Only a recommendation: the merchant may choose
+// another.
+func RecommendSize(memoryGB int) string {
 	switch {
 	case memoryGB >= 16:
-		return "qwen2.5:7b"
+		return "7b"
 	case memoryGB >= 8:
-		return "qwen2.5:3b"
+		return "3b"
 	default:
-		return "qwen2.5:1.5b"
+		return "1.5b"
 	}
+}
+
+// Recommend is the recommended model, as Ollama names it.
+func Recommend(memoryGB int) string {
+	return OllamaModel(RecommendSize(memoryGB))
+}
+
+// OllamaModel is a size as Ollama names it.
+func OllamaModel(size string) string {
+	return "qwen2.5:" + size
 }
 
 // MemoryGB reads the computer's memory, 0 when it cannot be read.

@@ -18,38 +18,50 @@ open on your network, no API key to pay for.
 
 ## Install
 
+Copy one line into a terminal: it downloads the latest release for your
+computer, checks it and installs `oso` for your account. No administrator
+rights needed.
+
+**Windows** - in PowerShell:
+
+```
+irm https://github.com/novalo-dev/Somcp-Relay/releases/latest/download/install.ps1 | iex
+```
+
+**macOS and Linux** - in Terminal:
+
+```
+curl -fsSL https://github.com/novalo-dev/Somcp-Relay/releases/latest/download/install.sh | sh
+```
+
+Then run:
+
+```
+oso ui
+```
+
+On macOS and Linux, open a new terminal first.
+
+<details>
+<summary>Install by hand</summary>
+
 1. Download the archive for your system from the
-   [latest release](https://github.com/novalo-dev/Somcp-Relay/releases/latest):
-   `windows-x64` (or `windows-arm64`), `macos-apple-silicon` (or
-   `macos-intel`), `linux-x64` (or `linux-arm64`).
-2. Extract the archive.
-3. Open a command window: Command Prompt or PowerShell on Windows, Terminal on
-   macOS and Linux.
-4. Go to the extracted folder and install `oso` for your account:
+   [latest release](https://github.com/novalo-dev/Somcp-Relay/releases/latest).
+2. Extract it, open a command window in the extracted folder and run
+   `.\oso.exe addtopath` (Windows) or `./oso addtopath` (macOS, Linux).
+   On macOS, run `xattr -d com.apple.quarantine oso` first.
+3. Open a new command window and run `oso ui`.
 
-   ```
-   cd <path to the extracted folder>
-   .\oso.exe addtopath    (Windows)
-   ./oso addtopath        (macOS, Linux)
-   ```
-
-   On macOS, run `xattr -d com.apple.quarantine oso` first. On Windows, if
-   SmartScreen warns: **More info**, then **Run anyway**.
-5. Open a new command window and run:
-
-   ```
-   oso ui
-   ```
-
-The downloaded files can then be deleted.
+</details>
 
 ## Then follow the steps on screen
 
 The interface opens in your browser:
 
 1. **Shop** - paste the command your shop's back office shows: the shop is linked.
-2. **Local AI** - type your AI's address and click **Test**, or click
-   **Install everything** under Ollama or LM Studio if you have none.
+2. **Local AI** - type your AI's address and click **Test**. If you have
+   none, choose a model (the one recommended for your computer is already
+   selected) and click **Install everything** under Ollama or LM Studio.
 3. **Relay** - it runs on its own. Turn on **Start with the computer** to keep
    it running after you close the window.
 
@@ -60,7 +72,8 @@ oso ui                         open the interface
 oso pair <shop> <code>         link a shop
 oso ai <address>               set your AI's address and test it
 oso ai free|stop|start         free your AI's memory, stop or start it
-oso llm setup ollama|lmstudio  install a local AI and a model
+oso llm setup ollama|lmstudio [1.5b|3b|7b|14b]
+                               install a local AI and a model
 oso llm list                   list your AI's models
 oso llm test [model]           check that a model can call tools
 oso llm install <model>        download a model into Ollama

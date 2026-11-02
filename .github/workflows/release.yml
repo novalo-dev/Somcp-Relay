@@ -91,7 +91,11 @@ jobs:
               (cd "$work" && zip -q "../../dist/oso-ai-relay-$name.zip" "$exe")
             fi
           done
-          (cd dist && sha256sum oso-ai-relay-* > SHA256SUMS.txt)
+          # The one-line installers the README gives: attached to each
+          # release, so releases/latest/download always serves a published
+          # script beside the archives it downloads.
+          cp install.sh install.ps1 dist/
+          (cd dist && sha256sum oso-ai-relay-* install.sh install.ps1 > SHA256SUMS.txt)
           ls -l dist
 
       - name: Publish

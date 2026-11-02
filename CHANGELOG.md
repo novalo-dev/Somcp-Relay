@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+**Install in one line.** One command in PowerShell, or in Terminal on macOS
+and Linux, downloads the latest version for your computer, checks it and
+installs `oso` for your account: no archive to extract, no folder to find.
+The README gives both lines.
+
+**Choose the model when installing an AI.** The relay's interface now lists
+the models it can install, from the lightest to the most capable, with the
+memory each one takes. The one suited to your computer is marked recommended
+and selected, and you can pick another. On the command line:
+`oso llm setup ollama 14b`.
+
 ## 0.3.1 - 2026-11-02
 
 ### Fixed

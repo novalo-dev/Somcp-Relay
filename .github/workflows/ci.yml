@@ -24,6 +24,12 @@ jobs:
       # languages, or its placeholders differ from the English ones.
       - name: go test
         run: go test ./...
+      # The installers run on merchants' computers straight from a pipe:
+      # shellcheck for the shell one, PowerShell's own parser for the other.
+      - name: Installers
+        run: |
+          shellcheck install.sh
+          pwsh -NoProfile -Command '$e = $null; [System.Management.Automation.Language.Parser]::ParseFile("$PWD/install.ps1", [ref]$null, [ref]$e) | Out-Null; if ($e) { $e; exit 1 }'
 
   build:
     name: Build ${{ matrix.goos }}/${{ matrix.goarch }}

@@ -19,7 +19,8 @@ import (
 // Setup installs a local AI with nothing for the merchant to do: it
 // downloads the software from its official site, installs it for the
 // current account only - no administrator rights -, starts it, downloads
-// a model suited to the computer's memory, and returns the address where
+// the model chosen - by default the one suited to the computer's memory -,
+// and returns the address where
 // it answers. The commands are the ones each vendor documents for its own
 // silent install; nothing else is run.
 
@@ -47,20 +48,26 @@ type Progress struct {
 var ErrNeedsZstd = errors.New("zstd missing")
 
 // Setup installs and starts the AI of the given kind, then downloads the
-// recommended model. It returns the address of the AI, and whether it
-// installed the AI itself - one already there is not the relay's to
-// uninstall later.
-func Setup(ctx context.Context, kind string, memoryGB int, report func(Progress)) (string, bool, error) {
+// model of the given size, or the recommended one when size is empty. It
+// returns the address of the AI, and whether it installed the AI itself -
+// one already there is not the relay's to uninstall later.
+func Setup(ctx context.Context, kind, size string, report func(Progress)) (string, bool, error) {
+	if size == "" {
+		size = RecommendSize(MemoryGB())
+	}
+	if !ValidSize(size) {
+		return "", false, fmt.Errorf("unknown model size %q", size)
+	}
 	switch kind {
 	case KindOllama:
-		return setupOllama(ctx, memoryGB, report)
+		return setupOllama(ctx, size, report)
 	case KindLMStudio:
-		return setupLMStudio(ctx, memoryGB, report)
+		return setupLMStudio(ctx, size, report)
 	}
 	return "", false, fmt.Errorf("unknown AI %q", kind)
 }
 
-func setupOllama(ctx context.Context, memoryGB int, report func(Progress)) (string, bool, error) {
+func setupOllama(ctx context.Context, size string, report func(Progress)) (string, bool, error) {
 	base, _ := Normalize(OllamaAddress)
 	installed := false
 	if !OllamaAnswers(ctx, base) {
@@ -80,7 +87,7 @@ func setupOllama(ctx context.Context, memoryGB int, report func(Progress)) (stri
 		}
 	}
 
-	model := Recommend(memoryGB)
+	model := OllamaModel(size)
 	report(Progress{Key: "setup.download_model", Args: []any{model, 0}, Percent: 0})
 	err := Pull(ctx, base, model, func(p int) {
 		report(Progress{Key: "setup.download_model", Args: []any{model, p}, Percent: p})
@@ -183,7 +190,7 @@ func startOllama() error {
 	return cmd.Start()
 }
 
-func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (string, bool, error) {
+func setupLMStudio(ctx context.Context, size string, report func(Progress)) (string, bool, error) {
 	lms := lmsPath()
 	installed := lms == ""
 	if lms == "" {
@@ -232,7 +239,7 @@ func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (st
 		}
 	}
 
-	model, source := RecommendLMStudio(memoryGB)
+	model, source := LMStudioModel(size)
 	report(Progress{Key: "setup.download_model", Args: []any{model, 0}, Percent: 0})
 	// --yes takes the download variant LM Studio preselects for this
 	// computer. Its progress is read from what it prints.
@@ -248,17 +255,11 @@ func setupLMStudio(ctx context.Context, memoryGB int, report func(Progress)) (st
 	return LMStudioAddress, installed, err
 }
 
-// RecommendLMStudio picks the same family as Recommend, from LM Studio's
-// own repository of tested builds: the name shown, and what lms gets.
-func RecommendLMStudio(memoryGB int) (string, string) {
-	size := "1.5B"
-	switch {
-	case memoryGB >= 16:
-		size = "7B"
-	case memoryGB >= 8:
-		size = "3B"
-	}
-	return "Qwen2.5-" + size + "-Instruct", "https://huggingface.co/lmstudio-community/Qwen2.5-" + size + "-Instruct-GGUF"
+// LMStudioModel is a size from LM Studio's own repository of tested
+// builds: the name shown, and what lms gets.
+func LMStudioModel(size string) (string, string) {
+	name := "Qwen2.5-" + strings.ToUpper(size) + "-Instruct"
+	return name, "https://huggingface.co/lmstudio-community/" + name + "-GGUF"
 }
 
 // lmsPath finds LM Studio's command, installed in ~/.lmstudio/bin unless
