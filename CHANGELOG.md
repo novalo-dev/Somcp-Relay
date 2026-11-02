@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.1 - 2026-11-02
+
+### Fixed
+
+**Linking a shop no longer fails with a bare "HTTP 503" on some hosts.** The
+relay called the shop without naming itself, and many hosts' anti-bot
+protections refuse such calls before they reach the shop. The relay now
+introduces itself as O'So AI Relay. When the host still refuses it, the
+relay says that the host refused it, names what answered (LiteSpeed,
+cloudflare...) and tells you to allow it in the hosting panel or ask your
+host. An address where the module does not answer, and a shop that fails,
+get their own messages too.
+
 ## 0.3.0 - 2026-11-02
 
 ### Added

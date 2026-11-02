@@ -21,6 +21,13 @@ Bodies are JSON. Every action but `pair` carries the relay's token:
 `Authorization: Bearer <token>`. A `401` on any of them means the token was
 revoked: the relay stops and asks to be linked again.
 
+Every call names the relay: `User-Agent: OSo-AI-Relay/<version>
+(+https://github.com/novalo-dev/Somcp-Relay)`. Hosts' anti-bot rules often
+block Go's default `Go-http-client`, and a host that still refuses the relay
+can allow it by this name. The module always answers in JSON: an error without
+a JSON body came from the web server or something in front of it, and the
+relay says so.
+
 ## pair - trade a pairing code for a token
 
 `POST action=pair`

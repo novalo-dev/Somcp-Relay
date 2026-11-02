@@ -97,3 +97,25 @@ func TestProtocol(t *testing.T) {
 		t.Errorf("revoked: %v", err)
 	}
 }
+
+// A host's anti-bot answers before the module: the relay must name itself,
+// and say who refused it rather than a bare status.
+func TestBlockedByHost(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.Header.Get("User-Agent"), "OSo-AI-Relay") {
+			t.Errorf("User-Agent %q", r.Header.Get("User-Agent"))
+		}
+		w.Header().Set("Server", "LiteSpeed")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte("<html>blocked</html>"))
+	}))
+	defer server.Close()
+	client, err := New(server.URL, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, err = client.Pair(context.Background(), "K7Q2-9XD4", "test", "linux")
+	if err == nil || !strings.Contains(err.Error(), "503") || !strings.Contains(err.Error(), "LiteSpeed") {
+		t.Fatalf("got %v", err)
+	}
+}

@@ -16,8 +16,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/novalo-dev/somcp-relay/internal/i18n"
 	"github.com/novalo-dev/somcp-relay/internal/llm"
 )
+
+// UserAgent names the relay to the shop's host. Without it Go sends
+// "Go-http-client", which many hosts' anti-bot rules block outright.
+var UserAgent = "OSo-AI-Relay (+https://github.com/novalo-dev/Somcp-Relay)"
 
 // ErrRevoked means the shop no longer knows the token: it was revoked in
 // the back office, or the relay was paired again elsewhere.
@@ -164,6 +169,7 @@ func (c *Client) call(ctx context.Context, method, action string, body any, out 
 		return err
 	}
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", UserAgent)
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -192,10 +198,34 @@ func (c *Client) call(ctx context.Context, method, action string, body any, out 
 		if json.Unmarshal(data, &problem) == nil && problem.Error != "" {
 			return fmt.Errorf("HTTP %d: %s", resp.StatusCode, problem.Error)
 		}
-		return fmt.Errorf("HTTP %d", resp.StatusCode)
+		return notTheModule(resp)
 	}
 	if out == nil || len(data) == 0 {
 		return nil
 	}
 	return json.Unmarshal(data, out)
+}
+
+// notTheModule explains an error the module did not write: it always
+// answers in JSON, so a bare status came from the web server or something
+// in front of it, and "HTTP 503" alone sends the merchant looking in the
+// wrong place.
+func notTheModule(resp *http.Response) error {
+	status := resp.StatusCode
+	switch status {
+	case http.StatusNotFound:
+		return errors.New(i18n.T("err.shop_no_module", status))
+	case http.StatusForbidden, http.StatusNotAcceptable, http.StatusTooManyRequests, http.StatusServiceUnavailable:
+		// The Server header names what answered (LiteSpeed, cloudflare...),
+		// which tells the merchant where the rule to change lives.
+		who := strings.TrimSpace(resp.Header.Get("Server"))
+		if who == "" {
+			return errors.New(i18n.T("err.shop_blocked", status))
+		}
+		return errors.New(i18n.T("err.shop_blocked_by", status, who))
+	}
+	if status >= 500 {
+		return errors.New(i18n.T("err.shop_failed", status))
+	}
+	return fmt.Errorf("HTTP %d", status)
 }

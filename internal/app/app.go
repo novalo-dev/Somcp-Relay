@@ -21,6 +21,12 @@ import (
 // Version is set at build time with -ldflags "-X ...app.Version=x.y.z".
 var Version = "dev"
 
+// The version travels in the User-Agent so a host's logs, and a merchant
+// allowing the relay through an anti-bot rule, see which build called.
+func init() {
+	shop.UserAgent = "OSo-AI-Relay/" + Version + " (+https://github.com/novalo-dev/Somcp-Relay)"
+}
+
 // Pair links a shop with the code its back office shows, and keeps the
 // token. Linking again replaces the shop linked before.
 func Pair(ctx context.Context, shopURL, code string) (shop.Info, error) {
