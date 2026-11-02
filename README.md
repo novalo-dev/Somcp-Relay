@@ -18,7 +18,7 @@ no API key to pay for.
 
    ```
    cd <path to the extracted folder>
-   oso.exe addtopath      (Windows)
+   .\oso.exe addtopath    (Windows)
    ./oso addtopath        (macOS, Linux)
    ```
 
