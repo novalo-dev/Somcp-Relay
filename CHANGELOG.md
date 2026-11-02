@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+**Ollama and LM Studio are only downloaded over https.** The one-click setup
+now refuses an installer address, or a redirect, that is not https: what it
+downloads is run right after, so nothing on the way can swap it.
+
 ## 0.3.3 - 2026-11-02
 
 ### Security
