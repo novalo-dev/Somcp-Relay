@@ -296,12 +296,30 @@ func setupDir() (string, error) {
 }
 
 // download saves a file and reports its progress.
+// downloadClient fetches the installers. What it downloads is run right
+// after, so every hop must stay on https: a redirect to plain http would let
+// anyone on the path swap the installer.
+var downloadClient = &http.Client{CheckRedirect: httpsOnly}
+
+func httpsOnly(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return errors.New("stopped after 10 redirects")
+	}
+	if req.URL.Scheme != "https" {
+		return fmt.Errorf("refused a redirect to %s: installers are only downloaded over https", req.URL.Redacted())
+	}
+	return nil
+}
+
 func download(ctx context.Context, address, path, label string, report func(Progress)) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
 		return err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	if req.URL.Scheme != "https" {
+		return fmt.Errorf("refused %s: installers are only downloaded over https", req.URL.Redacted())
+	}
+	resp, err := downloadClient.Do(req)
 	if err != nil {
 		return err
 	}
