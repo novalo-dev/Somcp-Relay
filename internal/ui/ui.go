@@ -72,6 +72,7 @@ func (s *Server) routes() http.Handler {
 		"/api/unlink":  func(*http.Request) (any, error) { return nil, app.Unlink() },
 		"/api/startup": s.startup,
 		"/api/setup":   s.startSetup,
+		"/api/power":   s.power,
 	}
 	for path, handler := range api {
 		handler := handler
@@ -290,4 +291,23 @@ func (s *Server) startSetup(r *http.Request) (any, error) {
 func lmModel(memory int) string {
 	name, _ := llm.RecommendLMStudio(memory)
 	return name
+}
+
+// power frees, stops or starts the local AI, and says how it went in the
+// page's language.
+func (s *Server) power(r *http.Request) (any, error) {
+	var in struct {
+		Action string `json:"action"`
+	}
+	if err := decode(r, &in); err != nil {
+		return nil, err
+	}
+	key, err := app.Power(r.Context(), in.Action)
+	if errors.Is(err, llm.ErrUnknownAI) {
+		return nil, errors.New(i18n.T("power.unknown"))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{"message": i18n.T(key)}, nil
 }

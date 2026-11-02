@@ -48,6 +48,7 @@ The interface opens in your browser:
 oso ui                         open the interface
 oso pair <shop> <code>         link a shop
 oso ai <address>               set your AI's address and test it
+oso ai free|stop|start         free your AI's memory, stop or start it
 oso llm setup ollama|lmstudio  install a local AI and a model
 oso llm list                   list your AI's models
 oso llm test [model]           check that a model can call tools

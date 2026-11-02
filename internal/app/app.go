@@ -77,6 +77,36 @@ func SetAI(ctx context.Context, address string) (string, []llm.Model, error) {
 	return relay.Software(ctx, ai.Base()), models, nil
 }
 
+// Power frees, stops or starts the local AI: "free" unloads its models,
+// "stop" also pauses the relay and closes the AI, "start" opens the AI again
+// and resumes the relay. It returns the text key of the outcome.
+func Power(ctx context.Context, action string) (string, error) {
+	cfg, err := config.Load()
+	if err != nil {
+		return "", err
+	}
+	if cfg.AIURL == "" {
+		return "", errors.New("no local AI address yet")
+	}
+	switch action {
+	case "free":
+		return "power.freed", llm.Free(ctx, cfg.AIURL)
+	case "stop":
+		// Paused first: a request arriving meanwhile waits in the shop
+		// instead of failing against an AI being closed.
+		if err := SetPaused(true); err != nil {
+			return "", err
+		}
+		return "power.stopped", llm.Stop(ctx, cfg.AIURL)
+	case "start":
+		if err := llm.Start(ctx, cfg.AIURL); err != nil {
+			return "", err
+		}
+		return "power.started", SetPaused(false)
+	}
+	return "", errors.New("unknown action")
+}
+
 // SetPaused pauses or resumes the relay without unlinking it.
 func SetPaused(paused bool) error {
 	cfg, err := config.Load()

@@ -79,6 +79,17 @@ func dispatch(ctx context.Context, args []string) error {
 		}
 		fmt.Println(i18n.T("pair.ok", info.Name))
 	case "ai":
+		if len(args) == 2 && (args[1] == "stop" || args[1] == "start" || args[1] == "free") {
+			key, err := app.Power(ctx, args[1])
+			if errors.Is(err, llm.ErrUnknownAI) {
+				return errors.New(i18n.T("power.unknown"))
+			}
+			if err != nil {
+				return err
+			}
+			fmt.Println(i18n.T(key))
+			return nil
+		}
 		if len(args) != 2 {
 			return usage("oso ai <address>")
 		}

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.4 - 2026-11-02
+
+### Added
+
+**Free memory, Stop everything, Start everything.** A local model held in
+memory can slow the whole computer down. Three buttons on the relay card, for
+Ollama and LM Studio: **Free memory** unloads the model and leaves the AI
+running, the next question loading it again; **Stop everything** also closes
+the AI and pauses the relay; **Start everything** opens the AI again, waits
+until it answers and resumes the relay. The same from the command line:
+`oso ai free`, `oso ai stop`, `oso ai start`.
+
 ## 0.2.3 - 2026-11-02
 
 ### Changed

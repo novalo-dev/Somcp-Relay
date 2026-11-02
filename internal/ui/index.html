@@ -111,6 +111,7 @@ details .inner{display:flex;flex-direction:column;gap:10px}
 .facts div{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .facts span{display:block;font-size:12px;color:var(--muted)}
 .facts strong{font-size:15px}
+.power{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
 .toggle{display:flex;align-items:center;gap:12px;padding:10px 0 0;border-top:1px solid var(--line)}
 .toggle .grow{flex:1 1 auto}
 .toggle p{margin:0;font-size:12.5px;color:var(--muted)}
@@ -220,6 +221,15 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
         <div><span data-t="ui.status.last"></span><strong id="s-last"></strong></div>
         <div><span data-t="ui.run.answered"></span><strong id="s-answered"></strong></div>
         <div><span data-t="ui.status.models"></span><strong id="s-models"></strong></div>
+      </div>
+      <div class="power">
+        <p class="hint" data-t="ui.power.hint"></p>
+        <div class="row">
+          <button class="btn ghost small" type="button" data-power="free" data-t="ui.power.free"></button>
+          <button class="btn ghost small" type="button" data-power="stop" data-t="ui.power.stop"></button>
+          <button class="btn ghost small" type="button" data-power="start" data-t="ui.power.start"></button>
+        </div>
+        <p class="msg" id="power-msg" role="status"></p>
       </div>
       <div class="toggle">
         <div class="grow"><label for="startup" data-t="ui.status.startup"></label><p data-t="ui.run.startup_hint"></p></div>
@@ -444,6 +454,22 @@ footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;ga
     b.addEventListener('click', function () {
       api('/api/setup', { kind: b.getAttribute('data-setup') }).then(refresh)
         .catch(function (err) { say('setup-msg', fmt('err.generic', err.message), 'bad'); });
+    });
+  });
+  document.querySelectorAll('[data-power]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var all = document.querySelectorAll('[data-power]');
+      all.forEach(function (x) { x.disabled = true; });
+      busy(b, true, t(b.getAttribute('data-t')));
+      say('power-msg', t('ui.working'), 'info');
+      api('/api/power', { action: b.getAttribute('data-power') })
+        .then(function (r) { say('power-msg', r.message, 'ok'); })
+        .catch(function (err) { say('power-msg', fmt('err.generic', err.message), 'bad'); })
+        .then(function () {
+          all.forEach(function (x) { x.disabled = false; });
+          busy(b, false, t(b.getAttribute('data-t')));
+          return refresh();
+        });
     });
   });
   $('pause').addEventListener('click', function () { api('/api/pause', { paused: !state.paused }).then(refresh); });
