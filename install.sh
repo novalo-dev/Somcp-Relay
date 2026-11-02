@@ -50,7 +50,9 @@ if command -v sha256sum >/dev/null 2>&1; then
 else
 	actual=$(shasum -a 256 "$tmp/$file" | cut -d ' ' -f 1)
 fi
-[ -n "$expected" ] && [ "$expected" = "$actual" ] || fail "the download does not match the release checksum"
+if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+	fail "the download does not match the release checksum"
+fi
 
 case "$file" in
 *.zip) unzip -q -o "$tmp/$file" -d "$tmp" ;;
