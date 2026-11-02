@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.2 - 2026-11-02
+
+### Added
+
+**`oso addtopath`.** Run it once from the folder where you extracted the relay
+and `oso` works from any new terminal: on Windows it adds the folder to your
+account's PATH, on macOS and Linux to the startup file of your shell. No
+administrator rights.
+
+### Changed
+
+**A short README**: what the relay is for, how to install it on Windows, macOS
+and Linux, the three steps on screen, and the commands.
+
 ## 0.2.1 - 2026-11-02
 
 ### Changed

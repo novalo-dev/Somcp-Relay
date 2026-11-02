@@ -18,6 +18,7 @@ import (
 	"github.com/novalo-dev/somcp-relay/internal/config"
 	"github.com/novalo-dev/somcp-relay/internal/i18n"
 	"github.com/novalo-dev/somcp-relay/internal/llm"
+	"github.com/novalo-dev/somcp-relay/internal/pathenv"
 	"github.com/novalo-dev/somcp-relay/internal/relay"
 	"github.com/novalo-dev/somcp-relay/internal/service"
 	"github.com/novalo-dev/somcp-relay/internal/shop"
@@ -105,6 +106,16 @@ func dispatch(ctx context.Context, args []string) error {
 		return serviceCall(service.Start, "service.started")
 	case "stop", "close":
 		return serviceCall(service.Stop, "service.stopped")
+	case "addtopath":
+		dir, already, err := pathenv.Add()
+		if err != nil {
+			return err
+		}
+		if already {
+			fmt.Println(i18n.T("path.already", dir))
+		} else {
+			fmt.Println(i18n.T("path.added", dir))
+		}
 	case "status":
 		status()
 	case "llm":
