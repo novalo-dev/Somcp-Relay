@@ -2,11 +2,11 @@
  "ai.fail": "L'IA ne répond pas à %s : %s",
  "ai.ok": "%s répond : %d modèles trouvés.",
  "err.generic": "Erreur : %s",
- "err.no_ai": "Pas encore d'adresse d'IA locale : lancez « somcp-relay ai <adresse> » ou ouvrez l'interface.",
- "err.not_linked": "Aucune boutique reliée : lancez « somcp-relay pair <boutique> <code> » ou ouvrez l'interface.",
- "err.unknown": "Commande inconnue : %s. Lancez « somcp-relay help ».",
+ "err.no_ai": "Pas encore d'adresse d'IA locale : lancez « oso ai <adresse> » ou ouvrez l'interface.",
+ "err.not_linked": "Aucune boutique reliée : lancez « oso pair <boutique> <code> » ou ouvrez l'interface.",
+ "err.unknown": "Commande inconnue : %s. Lancez « oso help ».",
  "err.usage": "Usage : %s",
- "help": "somcp-relay relie votre boutique PrestaShop à une IA qui tourne sur cet ordinateur.\n\nUsage : somcp-relay <commande> [arguments] [--lang en|fr|es|de]\n\nCommandes :\n  ui                     ouvrir l'interface\n  pair <boutique> <code> relier une boutique avec le code affiché dans son back-office\n  ai <adresse>           régler l'adresse de l'IA locale et la tester\n  run                    lancer le relais dans cette fenêtre\n  install / uninstall    démarrer ou ne plus démarrer avec l'ordinateur\n  start / stop           démarrer ou arrêter le relais en arrière-plan\n  status                 afficher la boutique, l'IA et le relais\n  llm list               lister les modèles de l'IA locale\n  llm test [modèle]      vérifier qu'un modèle sait appeler des outils\n  llm install <modèle>   télécharger un modèle dans Ollama\n  llm setup ollama|lmstudio\n                         installer une IA locale et un modèle, puis les tester\n  version                afficher la version\n  help                   afficher cette aide",
+ "help": "O'So AI Relay relie votre boutique PrestaShop à une IA qui tourne sur cet ordinateur.\n\nUsage : oso <commande> [arguments] [--lang en|fr|es|de]\n\nCommandes :\n  ui                     ouvrir l'interface\n  pair <boutique> <code> relier une boutique avec le code affiché dans son back-office\n  ai <adresse>           régler l'adresse de l'IA locale et la tester\n  run                    lancer le relais dans cette fenêtre\n  install / uninstall    démarrer ou ne plus démarrer avec l'ordinateur\n  start / stop           démarrer ou arrêter le relais en arrière-plan\n  status                 afficher la boutique, l'IA et le relais\n  llm list               lister les modèles de l'IA locale\n  llm test [modèle]      vérifier qu'un modèle sait appeler des outils\n  llm install <modèle>   télécharger un modèle dans Ollama\n  llm setup ollama|lmstudio\n                         installer une IA locale et un modèle, puis les tester\n  version                afficher la version\n  help                   afficher cette aide",
  "llm.no_model": "Aucun modèle installé dans l'IA locale.",
  "llm.progress": "%s : %d %%",
  "llm.pulled": "%s est installé.",
@@ -104,5 +104,5 @@
  "ui.tagline": "L'assistant de votre boutique, servi par l'IA de cet ordinateur.",
  "ui.version": "Version %s",
  "ui.working": "Test en cours...",
- "version": "somcp-relay %s"
+ "version": "O'So AI Relay %s"
 }

@@ -13,7 +13,9 @@ import (
 	"strings"
 )
 
-// Name is the service's name on every system.
+// Name is the service's name on every system. It keeps the name of the
+// first versions, so a relay installed with one of them is still found,
+// stopped and removed by a newer one.
 const Name = "somcp-relay"
 
 const label = "fr.novalo.somcp-relay"
@@ -41,7 +43,7 @@ func Install() error {
 		if err != nil {
 			return err
 		}
-		unit := fmt.Sprintf("[Unit]\nDescription=somcp-relay\nAfter=network-online.target\n\n[Service]\nExecStart=%q run\nRestart=on-failure\nRestartSec=10\n\n[Install]\nWantedBy=default.target\n", exe)
+		unit := fmt.Sprintf("[Unit]\nDescription=O'So AI Relay\nAfter=network-online.target\n\n[Service]\nExecStart=%q run\nRestart=on-failure\nRestartSec=10\n\n[Install]\nWantedBy=default.target\n", exe)
 		if err := writeFile(path, unit); err != nil {
 			return err
 		}

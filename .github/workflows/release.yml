@@ -66,8 +66,9 @@ jobs:
           go vet ./...
           go test ./...
 
-      # Named for people, not for Go: macos rather than darwin, x64 beside
-      # arm64 so the download page reads at a glance.
+      # One archive per system, named for people - macos rather than
+      # darwin, x64 beside arm64 - each holding a program called oso, the
+      # name typed on the command line.
       - name: Build
         if: steps.version.outputs.publish == 'true'
         env:
@@ -75,15 +76,22 @@ jobs:
           CGO_ENABLED: '0'
         run: |
           mkdir dist
-          for target in windows/amd64/windows-x64.exe windows/arm64/windows-arm64.exe \
+          for target in windows/amd64/windows-x64 windows/arm64/windows-arm64 \
                         darwin/amd64/macos-intel darwin/arm64/macos-apple-silicon \
                         linux/amd64/linux-x64 linux/arm64/linux-arm64; do
             goos=${target%%/*}; rest=${target#*/}; goarch=${rest%%/*}; name=${rest#*/}
+            exe=oso; [ "$goos" = windows ] && exe=oso.exe
+            work="build/$name"; mkdir -p "$work"
             GOOS=$goos GOARCH=$goarch go build -trimpath \
               -ldflags "-s -w -X github.com/novalo-dev/somcp-relay/internal/app.Version=$VERSION" \
-              -o "dist/somcp-relay-$name" .
+              -o "$work/$exe" .
+            if [ "$goos" = linux ]; then
+              tar -czf "dist/oso-ai-relay-$name.tar.gz" -C "$work" "$exe"
+            else
+              (cd "$work" && zip -q "../../dist/oso-ai-relay-$name.zip" "$exe")
+            fi
           done
-          (cd dist && sha256sum somcp-relay-* > SHA256SUMS.txt)
+          (cd dist && sha256sum oso-ai-relay-* > SHA256SUMS.txt)
           ls -l dist
 
       - name: Publish
@@ -94,6 +102,6 @@ jobs:
         run: |
           gh release create "v$VERSION" dist/* \
             --target "$GITHUB_SHA" \
-            --title "somcp-relay $VERSION" \
+            --title "O'So AI Relay $VERSION" \
             --notes-file notes.md \
             --latest

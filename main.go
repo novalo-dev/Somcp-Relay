@@ -1,4 +1,4 @@
-// somcp-relay links a PrestaShop shop running the somcp module to an AI
+// O'So AI Relay links a PrestaShop shop running the somcp module to an AI
 // running on this computer. It calls the shop, never the other way round,
 // so nothing is opened on the local network.
 package main
@@ -70,7 +70,7 @@ func dispatch(ctx context.Context, args []string) error {
 		fmt.Println(i18n.T("version", app.Version))
 	case "pair":
 		if len(args) != 3 {
-			return usage("somcp-relay pair <shop> <code>")
+			return usage("oso pair <shop> <code>")
 		}
 		info, err := app.Pair(ctx, args[1], args[2])
 		if err != nil {
@@ -79,7 +79,7 @@ func dispatch(ctx context.Context, args []string) error {
 		fmt.Println(i18n.T("pair.ok", info.Name))
 	case "ai":
 		if len(args) != 2 {
-			return usage("somcp-relay ai <address>")
+			return usage("oso ai <address>")
 		}
 		software, models, err := app.SetAI(ctx, args[1])
 		if err != nil {
@@ -154,7 +154,7 @@ func llmCommand(ctx context.Context, args []string) error {
 	// setup needs no AI yet: it is how one gets installed.
 	if len(args) >= 1 && args[0] == "setup" {
 		if len(args) != 2 {
-			return usage("somcp-relay llm setup ollama|lmstudio")
+			return usage("oso llm setup ollama|lmstudio")
 		}
 		address, err := llm.Setup(ctx, args[1], llm.MemoryGB(), func(p llm.Progress) {
 			fmt.Printf("\r%s", i18n.T(p.Key, p.Args...))
@@ -185,7 +185,7 @@ func llmCommand(ctx context.Context, args []string) error {
 		return err
 	}
 	if len(args) == 0 {
-		return usage("somcp-relay llm list|test [model]|install <model>")
+		return usage("oso llm list|test [model]|install <model>")
 	}
 	switch args[0] {
 	case "list":
@@ -218,7 +218,7 @@ func llmCommand(ctx context.Context, args []string) error {
 		}
 	case "install":
 		if len(args) != 2 {
-			return usage("somcp-relay llm install <model>")
+			return usage("oso llm install <model>")
 		}
 		if !llm.OllamaAnswers(ctx, ai.Base()) {
 			return errors.New(i18n.T("ollama.missing", llm.OllamaRoot(ai.Base()), llm.DownloadPage))

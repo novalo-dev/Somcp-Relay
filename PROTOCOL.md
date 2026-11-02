@@ -1,6 +1,6 @@
 # Relay protocol
 
-How `somcp-relay` and the somcp module of a PrestaShop shop talk. The relay
+How O'So AI Relay (`oso`) and the somcp module of a PrestaShop shop talk. The relay
 always calls the shop; the shop never calls the relay, so nothing has to be
 opened on the merchant's network.
 

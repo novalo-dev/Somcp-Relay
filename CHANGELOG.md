@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0 - 2026-11-02
+
+### Changed
+
+**The relay is now O'So AI Relay, and its command is `oso`.** Every command
+is typed with the short name - `oso pair`, `oso ai`, `oso llm setup ollama` -
+and the interface carries the new name. Each release file is now an archive,
+`oso-ai-relay-<system>.zip` (`.tar.gz` on Linux), holding a single program
+called `oso`. Your settings and the start with the computer set up by an
+earlier version are kept and found as they are.
+
+The README now explains every step of the program on its own: download,
+the interface, the one-click install of a local AI, the command line,
+starting with the computer, where the settings live, and what to do when
+something does not work.
+
 ## 0.1.1 - 2026-11-02
 
 ### Added

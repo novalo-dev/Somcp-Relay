@@ -34,6 +34,8 @@ func Dir() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// The folder keeps the name of the first versions, so the shop linked
+	// with one of them survives the update.
 	return filepath.Join(base, "somcp-relay"), nil
 }
 

@@ -2,11 +2,11 @@
  "ai.fail": "Die KI antwortet nicht unter %s: %s",
  "ai.ok": "%s antwortet: %d Modelle gefunden.",
  "err.generic": "Fehler: %s",
- "err.no_ai": "Noch keine Adresse der lokalen KI: Führen Sie „somcp-relay ai <Adresse>“ aus oder öffnen Sie die Oberfläche.",
- "err.not_linked": "Noch kein Shop verbunden: Führen Sie „somcp-relay pair <Shop> <Code>“ aus oder öffnen Sie die Oberfläche.",
- "err.unknown": "Unbekannter Befehl: %s. Führen Sie „somcp-relay help“ aus.",
+ "err.no_ai": "Noch keine Adresse der lokalen KI: Führen Sie „oso ai <Adresse>“ aus oder öffnen Sie die Oberfläche.",
+ "err.not_linked": "Noch kein Shop verbunden: Führen Sie „oso pair <Shop> <Code>“ aus oder öffnen Sie die Oberfläche.",
+ "err.unknown": "Unbekannter Befehl: %s. Führen Sie „oso help“ aus.",
  "err.usage": "Verwendung: %s",
- "help": "somcp-relay verbindet Ihren PrestaShop-Shop mit einer KI, die auf diesem Computer läuft.\n\nVerwendung: somcp-relay <Befehl> [Argumente] [--lang en|fr|es|de]\n\nBefehle:\n  ui                     die Oberfläche öffnen\n  pair <Shop> <Code>     einen Shop mit dem Code aus seinem Backoffice verbinden\n  ai <Adresse>           die Adresse der lokalen KI festlegen und testen\n  run                    das Relay in diesem Fenster ausführen\n  install / uninstall    mit dem Computer starten oder nicht mehr starten\n  start / stop           das Relay im Hintergrund starten oder stoppen\n  status                 Shop, KI und Relay anzeigen\n  llm list               die Modelle der lokalen KI auflisten\n  llm test [Modell]      prüfen, ob ein Modell Werkzeuge aufrufen kann\n  llm install <Modell>   ein Modell in Ollama herunterladen\n  llm setup ollama|lmstudio\n                         eine lokale KI und ein Modell installieren und testen\n  version                die Version anzeigen\n  help                   diese Hilfe anzeigen",
+ "help": "O'So AI Relay verbindet Ihren PrestaShop-Shop mit einer KI, die auf diesem Computer läuft.\n\nVerwendung: oso <Befehl> [Argumente] [--lang en|fr|es|de]\n\nBefehle:\n  ui                     die Oberfläche öffnen\n  pair <Shop> <Code>     einen Shop mit dem Code aus seinem Backoffice verbinden\n  ai <Adresse>           die Adresse der lokalen KI festlegen und testen\n  run                    das Relay in diesem Fenster ausführen\n  install / uninstall    mit dem Computer starten oder nicht mehr starten\n  start / stop           das Relay im Hintergrund starten oder stoppen\n  status                 Shop, KI und Relay anzeigen\n  llm list               die Modelle der lokalen KI auflisten\n  llm test [Modell]      prüfen, ob ein Modell Werkzeuge aufrufen kann\n  llm install <Modell>   ein Modell in Ollama herunterladen\n  llm setup ollama|lmstudio\n                         eine lokale KI und ein Modell installieren und testen\n  version                die Version anzeigen\n  help                   diese Hilfe anzeigen",
  "llm.no_model": "Kein Modell in der lokalen KI installiert.",
  "llm.progress": "%s: %d %%",
  "llm.pulled": "%s ist installiert.",
@@ -104,5 +104,5 @@
  "ui.tagline": "Der Assistent Ihres Shops, beantwortet von der KI auf diesem Computer.",
  "ui.version": "Version %s",
  "ui.working": "Wird getestet...",
- "version": "somcp-relay %s"
+ "version": "O'So AI Relay %s"
 }

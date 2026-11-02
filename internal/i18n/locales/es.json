@@ -2,11 +2,11 @@
  "ai.fail": "La IA no responde en %s: %s",
  "ai.ok": "%s responde: %d modelos encontrados.",
  "err.generic": "Error: %s",
- "err.no_ai": "Aún no hay dirección de IA local: ejecute «somcp-relay ai <dirección>» o abra la interfaz.",
- "err.not_linked": "Ninguna tienda vinculada: ejecute «somcp-relay pair <tienda> <código>» o abra la interfaz.",
- "err.unknown": "Comando desconocido: %s. Ejecute «somcp-relay help».",
+ "err.no_ai": "Aún no hay dirección de IA local: ejecute «oso ai <dirección>» o abra la interfaz.",
+ "err.not_linked": "Ninguna tienda vinculada: ejecute «oso pair <tienda> <código>» o abra la interfaz.",
+ "err.unknown": "Comando desconocido: %s. Ejecute «oso help».",
  "err.usage": "Uso: %s",
- "help": "somcp-relay conecta su tienda PrestaShop con una IA que funciona en este ordenador.\n\nUso: somcp-relay <comando> [argumentos] [--lang en|fr|es|de]\n\nComandos:\n  ui                     abrir la interfaz\n  pair <tienda> <código> vincular una tienda con el código de su back office\n  ai <dirección>         configurar la dirección de la IA local y probarla\n  run                    ejecutar el relé en esta ventana\n  install / uninstall    arrancar o dejar de arrancar con el ordenador\n  start / stop           iniciar o detener el relé en segundo plano\n  status                 mostrar la tienda, la IA y el relé\n  llm list               listar los modelos de la IA local\n  llm test [modelo]      comprobar que un modelo sabe llamar herramientas\n  llm install <modelo>   descargar un modelo en Ollama\n  llm setup ollama|lmstudio\n                         instalar una IA local y un modelo, y probarlos\n  version                mostrar la versión\n  help                   mostrar esta ayuda",
+ "help": "O'So AI Relay conecta su tienda PrestaShop con una IA que funciona en este ordenador.\n\nUso: oso <comando> [argumentos] [--lang en|fr|es|de]\n\nComandos:\n  ui                     abrir la interfaz\n  pair <tienda> <código> vincular una tienda con el código de su back office\n  ai <dirección>         configurar la dirección de la IA local y probarla\n  run                    ejecutar el relé en esta ventana\n  install / uninstall    arrancar o dejar de arrancar con el ordenador\n  start / stop           iniciar o detener el relé en segundo plano\n  status                 mostrar la tienda, la IA y el relé\n  llm list               listar los modelos de la IA local\n  llm test [modelo]      comprobar que un modelo sabe llamar herramientas\n  llm install <modelo>   descargar un modelo en Ollama\n  llm setup ollama|lmstudio\n                         instalar una IA local y un modelo, y probarlos\n  version                mostrar la versión\n  help                   mostrar esta ayuda",
  "llm.no_model": "Ningún modelo instalado en la IA local.",
  "llm.progress": "%s: %d %%",
  "llm.pulled": "%s está instalado.",
@@ -104,5 +104,5 @@
  "ui.tagline": "El asistente de su tienda, atendido por la IA de este ordenador.",
  "ui.version": "Versión %s",
  "ui.working": "Probando...",
- "version": "somcp-relay %s"
+ "version": "O'So AI Relay %s"
 }

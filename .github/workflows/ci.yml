@@ -43,8 +43,8 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: '0'
-        run: go build -trimpath -ldflags "-s -w -X github.com/novalo-dev/somcp-relay/internal/app.Version=dev-${GITHUB_SHA::7}" -o somcp-relay-${{ matrix.goos }}-${{ matrix.goarch }}$([ "${{ matrix.goos }}" = windows ] && echo .exe) .
+        run: go build -trimpath -ldflags "-s -w -X github.com/novalo-dev/somcp-relay/internal/app.Version=dev-${GITHUB_SHA::7}" -o oso-${{ matrix.goos }}-${{ matrix.goarch }}$([ "${{ matrix.goos }}" = windows ] && echo .exe) .
       - uses: actions/upload-artifact@v4
         with:
-          name: somcp-relay-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: somcp-relay-*
+          name: oso-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: oso-*
