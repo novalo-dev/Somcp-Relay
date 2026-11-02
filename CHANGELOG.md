@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.3 - 2026-11-02
+
+### Changed
+
+**`oso addtopath` installs the relay for your account.** It used to put the
+extracted folder on your PATH, so deleting the download broke the `oso`
+command. It now copies `oso` into a fixed folder of your account -
+`%LOCALAPPDATA%\Programs\oso` on Windows, `~/.local/bin` on macOS and Linux -
+and puts that folder on your PATH: the archive and the extracted folder can
+be deleted. A relay already starting with your computer is moved to the new
+copy. The README now starts with this command, then `oso ui`.
+
 ## 0.2.2 - 2026-11-02
 
 ### Added

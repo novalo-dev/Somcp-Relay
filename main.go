@@ -107,14 +107,18 @@ func dispatch(ctx context.Context, args []string) error {
 	case "stop", "close":
 		return serviceCall(service.Stop, "service.stopped")
 	case "addtopath":
-		dir, already, err := pathenv.Add()
+		res, err := pathenv.Add()
 		if err != nil {
 			return err
 		}
-		if already {
-			fmt.Println(i18n.T("path.already", dir))
+		// A relay already starting with the computer is moved to the copy.
+		if service.Installed() {
+			_ = pathenv.Restart(res.Program)
+		}
+		if res.Already {
+			fmt.Println(i18n.T("path.already", res.Program))
 		} else {
-			fmt.Println(i18n.T("path.added", dir))
+			fmt.Println(i18n.T("path.added", res.Program))
 		}
 	case "status":
 		status()
