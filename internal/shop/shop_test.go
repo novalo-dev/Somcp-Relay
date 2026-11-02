@@ -119,3 +119,42 @@ func TestBlockedByHost(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
+// Plain http only reaches this computer or the local network: a public
+// name that merely starts like a private address does not count.
+func TestLocalHost(t *testing.T) {
+	for host, want := range map[string]bool{
+		"localhost": true, "127.0.0.1": true, "::1": true, "10.0.0.5": true,
+		"172.20.1.1": true, "192.168.1.10": true, "shop.local": true,
+		"10.example.com": false, "192.168.evil.com": false, "8.8.8.8": false,
+		"172.32.0.1": false, "example.com": false,
+	} {
+		if got := localHost(host); got != want {
+			t.Errorf("localHost(%q) = %v, want %v", host, got, want)
+		}
+	}
+}
+
+// A shop that redirects from https to http must not receive the token in
+// clear.
+func TestNoDowngrade(t *testing.T) {
+	plain := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "" {
+			t.Error("the token reached plain http")
+		}
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer plain.Close()
+	secure := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, plain.URL+r.URL.RequestURI(), http.StatusFound)
+	}))
+	defer secure.Close()
+	client, err := New(secure.URL, "tok")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.http.Transport = secure.Client().Transport
+	if err := client.Result(context.Background(), "j1", 200, []byte(`{}`), ""); err == nil {
+		t.Fatal("the redirect to http was followed")
+	}
+}

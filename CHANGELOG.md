@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+**The relay's key only travels encrypted.** Plain http is now accepted only
+for an address that really is on this computer or the local network, and the
+relay no longer follows a shop that sends it from https to http: it says so
+and asks for the shop's https address.
+
 ## 0.3.2 - 2026-11-02
 
 ### Added

@@ -6,6 +6,7 @@
  "err.not_linked": "Noch kein Shop verbunden: Führen Sie „oso pair <Shop> <Code>“ aus oder öffnen Sie die Oberfläche.",
  "err.shop_blocked": "HTTP %d: Der Hoster des Shops hat das Relay abgewiesen, bevor es den Shop erreichte. Seine Firewall oder sein Bot-Schutz blockiert es: Erlauben Sie es im Hosting-Panel oder fragen Sie Ihren Hoster.",
  "err.shop_blocked_by": "HTTP %d: %s hat das Relay abgewiesen, bevor es den Shop erreichte. Die Firewall oder der Bot-Schutz des Hosters blockiert es: Erlauben Sie es im Hosting-Panel oder fragen Sie Ihren Hoster.",
+ "err.shop_downgrade": "Der Shop leitet das Relay von https auf http um, wo sein Schlüssel unverschlüsselt übertragen würde: Das Relay lehnt ab. Verwenden Sie die https-Adresse des Shops und prüfen Sie, dass er https-Besucher nicht auf http umleitet.",
  "err.shop_failed": "HTTP %d: Der Shop konnte nicht antworten. Sein Fehlerprotokoll nennt den Grund.",
  "err.shop_no_module": "HTTP %d: unter dieser Adresse antwortet nichts. Prüfen Sie die Shop-Adresse und ob O'So MCP Server installiert und aktiviert ist.",
  "err.unknown": "Unbekannter Befehl: %s. Führen Sie „oso help“ aus.",

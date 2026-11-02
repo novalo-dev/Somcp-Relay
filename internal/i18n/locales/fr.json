@@ -6,6 +6,7 @@
  "err.not_linked": "Aucune boutique reliée : lancez « oso pair <boutique> <code> » ou ouvrez l'interface.",
  "err.shop_blocked": "HTTP %d : l'hébergeur de la boutique a refusé le relais avant qu'il n'atteigne la boutique. Son pare-feu ou sa protection anti-bot le bloque : autorisez-le dans le panneau d'hébergement, ou demandez à votre hébergeur.",
  "err.shop_blocked_by": "HTTP %d : %s a refusé le relais avant qu'il n'atteigne la boutique. Le pare-feu ou la protection anti-bot de l'hébergeur le bloque : autorisez-le dans le panneau d'hébergement, ou demandez à votre hébergeur.",
+ "err.shop_downgrade": "La boutique redirige le relais de https vers http, où sa clé circulerait en clair : le relais refuse. Utilisez l'adresse https de la boutique, et vérifiez qu'elle ne renvoie pas les visiteurs https vers http.",
  "err.shop_failed": "HTTP %d : la boutique n'a pas réussi à répondre. Son journal d'erreurs dit pourquoi.",
  "err.shop_no_module": "HTTP %d : rien ne répond à cette adresse. Vérifiez l'adresse de la boutique, et que O'So MCP Server est installé et activé.",
  "err.unknown": "Commande inconnue : %s. Lancez « oso help ».",

@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -74,9 +75,33 @@ func Endpoint(shopURL string) (string, error) {
 	return u.String(), nil
 }
 
+// localHost says whether plain http can carry the token to this host: this
+// computer or the local network only. The host must be a real IP address in
+// those ranges, or localhost, or an mDNS .local name - a prefix test would
+// let a public name such as 10.example.com through.
 func localHost(host string) bool {
-	return host == "localhost" || host == "127.0.0.1" || host == "::1" ||
-		strings.HasPrefix(host, "192.168.") || strings.HasPrefix(host, "10.") || strings.HasSuffix(host, ".local")
+	if host == "localhost" || strings.HasSuffix(host, ".local") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && (ip.IsLoopback() || ip.IsPrivate())
+}
+
+// errDowngrade stops a redirect from https to plain http: the token would
+// follow the request in clear.
+var errDowngrade = errors.New("redirect from https to http")
+
+// keepHTTPS is the client's redirect policy. Go already drops the token
+// when a redirect leaves for another host, but not when the same host
+// sends it to http.
+func keepHTTPS(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return errors.New("stopped after 10 redirects")
+	}
+	if via[0].URL.Scheme == "https" && req.URL.Scheme != "https" {
+		return errDowngrade
+	}
+	return nil
 }
 
 // New returns a client for a shop, with the token when already paired.
@@ -87,7 +112,7 @@ func New(shopURL, token string) (*Client, error) {
 	}
 	// Longer than the shop's own wait on next, so a quiet poll ends on the
 	// shop's side and not as a client timeout.
-	return &Client{endpoint: endpoint, token: token, http: &http.Client{Timeout: 60 * time.Second}}, nil
+	return &Client{endpoint: endpoint, token: token, http: &http.Client{Timeout: 60 * time.Second, CheckRedirect: keepHTTPS}}, nil
 }
 
 // Pair trades a pairing code for the relay's token.
@@ -177,6 +202,9 @@ func (c *Client) call(ctx context.Context, method, action string, body any, out 
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	}
 	resp, err := c.http.Do(req)
+	if errors.Is(err, errDowngrade) {
+		return errors.New(i18n.T("err.shop_downgrade"))
+	}
 	if err != nil {
 		return err
 	}

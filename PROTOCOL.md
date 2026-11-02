@@ -14,12 +14,14 @@ URLs on or off:
 ```
 
 The shop address must be `https://`. Plain `http://` is accepted only for
-`localhost`, `127.0.0.1`, private `192.168.*` and `10.*` addresses and
-`*.local` names, where a test shop runs on the same network.
+`localhost`, loopback and private IP addresses (`10.*`, `172.16.*` to
+`172.31.*`, `192.168.*`) and `*.local` names, where a test shop runs on the
+same network.
 
 Bodies are JSON. Every action but `pair` carries the relay's token:
 `Authorization: Bearer <token>`. A `401` on any of them means the token was
-revoked: the relay stops and asks to be linked again.
+revoked: the relay stops and asks to be linked again. A redirect from
+`https://` to `http://` is refused, so the token never travels in clear.
 
 Every call names the relay: `User-Agent: OSo-AI-Relay/<version>
 (+https://github.com/novalo-dev/Somcp-Relay)`. Hosts' anti-bot rules often
