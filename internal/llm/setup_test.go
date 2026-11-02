@@ -32,13 +32,13 @@ func TestDownloadHTTPSOnly(t *testing.T) {
 
 	dir := t.TempDir()
 	report := func(Progress) {}
-	if err := download(context.Background(), secure.URL+"/ok", filepath.Join(dir, "a"), "AI", report); err != nil {
+	if err := Download(context.Background(), secure.URL+"/ok", filepath.Join(dir, "a"), "AI", report); err != nil {
 		t.Fatalf("https download refused: %v", err)
 	}
-	if err := download(context.Background(), secure.URL+"/moved", filepath.Join(dir, "b"), "AI", report); err == nil || reached {
+	if err := Download(context.Background(), secure.URL+"/moved", filepath.Join(dir, "b"), "AI", report); err == nil || reached {
 		t.Fatalf("redirect to http followed (err %v, reached %v)", err, reached)
 	}
-	if err := download(context.Background(), plain.URL+"/setup.exe", filepath.Join(dir, "c"), "AI", report); err == nil || reached {
+	if err := Download(context.Background(), plain.URL+"/setup.exe", filepath.Join(dir, "c"), "AI", report); err == nil || reached {
 		t.Fatalf("plain http address downloaded (err %v, reached %v)", err, reached)
 	}
 }

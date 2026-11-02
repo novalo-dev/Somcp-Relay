@@ -18,7 +18,7 @@
  "ev.refused": "refused - %s",
  "ev.shop_down": "shop unreachable - new try in %s",
  "ev.started": "relay started",
- "help": "O'So AI Relay links your PrestaShop shop to an AI running on this computer.\n\nUsage: oso <command> [arguments] [--lang en|fr|es|de]\n\nCommands:\n  ui                     open the interface\n  pair <shop> <code>     link a shop with the code shown in its back office\n  ai <address>           set the address of the local AI and test it\n  ai stop|start|free     stop or start your local AI, or free its memory\n  run                    run the relay in this window\n  install / uninstall    start or stop starting with this computer\n  start / stop           start or stop the background relay\n  status                 show the shop, the AI and the relay\n  addtopath              install oso for your account and type it from any folder\n  remove [--keep-ai]     uninstall oso from this computer (and the AIs it installed)\n  llm list               list the models of the local AI\n  llm test [model]       check that a model can call tools\n  llm install <model>    download a model into Ollama\n  llm setup ollama|lmstudio [model]\n                         install a local AI and a model, then test it\n  llm remove ollama|lmstudio\n                         uninstall an AI oso installed, with its models\n  version                show the version\n  help                   show this help",
+ "help": "O'So AI Relay links your PrestaShop shop to an AI running on this computer.\n\nUsage: oso <command> [arguments] [--lang en|fr|es|de]\n\nCommands:\n  ui                     open the interface\n  pair <shop> <code>     link a shop with the code shown in its back office\n  ai <address>           set the address of the local AI and test it\n  ai stop|start|free     stop or start your local AI, or free its memory\n  run                    run the relay in this window\n  install / uninstall    start or stop starting with this computer\n  start / stop           start or stop the background relay\n  status                 show the shop, the AI and the relay\n  update                 install the latest version of oso\n  addtopath              install oso for your account and type it from any folder\n  remove [--keep-ai]     uninstall oso from this computer (and the AIs it installed)\n  llm list               list the models of the local AI\n  llm test [model]       check that a model can call tools\n  llm install <model>    download a model into Ollama\n  llm setup ollama|lmstudio [model]\n                         install a local AI and a model, then test it\n  llm remove ollama|lmstudio\n                         uninstall an AI oso installed, with its models\n  version                show the version\n  help                   show this help",
  "llm.no_model": "No model installed in the local AI.",
  "llm.progress": "%s: %d%%",
  "llm.pulled": "%s is installed.",
@@ -192,5 +192,9 @@
  "ui.tagline": "Your shop's assistant, answered by the AI on this computer.",
  "ui.version": "Version %s",
  "ui.working": "Testing...",
+ "update.check": "Looking for a new version...",
+ "update.done": "O'So AI Relay updated from %s to %s. If the interface is open, close it and run oso ui again.",
+ "update.download": "Downloading O'So AI Relay %s...",
+ "update.latest": "O'So AI Relay %s is the latest version.",
  "version": "O'So AI Relay %s"
 }

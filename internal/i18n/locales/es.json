@@ -18,7 +18,7 @@
  "ev.refused": "rechazada - %s",
  "ev.shop_down": "tienda inaccesible - nuevo intento en %s",
  "ev.started": "relé iniciado",
- "help": "O'So AI Relay conecta su tienda PrestaShop con una IA que funciona en este ordenador.\n\nUso: oso <comando> [argumentos] [--lang en|fr|es|de]\n\nComandos:\n  ui                     abrir la interfaz\n  pair <tienda> <código> vincular una tienda con el código de su back office\n  ai <dirección>         configurar la dirección de la IA local y probarla\n  ai stop|start|free     detener o iniciar su IA local, o liberar su memoria\n  run                    ejecutar el relé en esta ventana\n  install / uninstall    arrancar o dejar de arrancar con el ordenador\n  start / stop           iniciar o detener el relé en segundo plano\n  status                 mostrar la tienda, la IA y el relé\n  addtopath              instalar oso en su cuenta y escribirlo desde cualquier carpeta\n  remove [--keep-ai]     desinstalar oso de este ordenador (y las IA que instaló)\n  llm list               listar los modelos de la IA local\n  llm test [modelo]      comprobar que un modelo sabe llamar herramientas\n  llm install <modelo>   descargar un modelo en Ollama\n  llm setup ollama|lmstudio [model]\n                         instalar una IA local y un modelo, y probarlos\n  llm remove ollama|lmstudio\n                         desinstalar una IA instalada por oso, con sus modelos\n  version                mostrar la versión\n  help                   mostrar esta ayuda",
+ "help": "O'So AI Relay conecta su tienda PrestaShop con una IA que funciona en este ordenador.\n\nUso: oso <comando> [argumentos] [--lang en|fr|es|de]\n\nComandos:\n  ui                     abrir la interfaz\n  pair <tienda> <código> vincular una tienda con el código de su back office\n  ai <dirección>         configurar la dirección de la IA local y probarla\n  ai stop|start|free     detener o iniciar su IA local, o liberar su memoria\n  run                    ejecutar el relé en esta ventana\n  install / uninstall    arrancar o dejar de arrancar con el ordenador\n  start / stop           iniciar o detener el relé en segundo plano\n  status                 mostrar la tienda, la IA y el relé\n  update                 instalar la última versión de oso\n  addtopath              instalar oso en su cuenta y escribirlo desde cualquier carpeta\n  remove [--keep-ai]     desinstalar oso de este ordenador (y las IA que instaló)\n  llm list               listar los modelos de la IA local\n  llm test [modelo]      comprobar que un modelo sabe llamar herramientas\n  llm install <modelo>   descargar un modelo en Ollama\n  llm setup ollama|lmstudio [model]\n                         instalar una IA local y un modelo, y probarlos\n  llm remove ollama|lmstudio\n                         desinstalar una IA instalada por oso, con sus modelos\n  version                mostrar la versión\n  help                   mostrar esta ayuda",
  "llm.no_model": "Ningún modelo instalado en la IA local.",
  "llm.progress": "%s: %d %%",
  "llm.pulled": "%s está instalado.",
@@ -192,5 +192,9 @@
  "ui.tagline": "El asistente de su tienda, atendido por la IA de este ordenador.",
  "ui.version": "Versión %s",
  "ui.working": "Probando...",
+ "update.check": "Buscando una nueva versión...",
+ "update.done": "O'So AI Relay se actualizó de %s a %s. Si la interfaz está abierta, ciérrela y vuelva a ejecutar oso ui.",
+ "update.download": "Descargando O'So AI Relay %s...",
+ "update.latest": "O'So AI Relay %s es la última versión.",
  "version": "O'So AI Relay %s"
 }

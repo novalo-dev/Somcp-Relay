@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.3.5 - 2026-11-02
+
+### Added
+
+**`oso update`.** One command installs the latest version: it downloads it
+over https, checks it against the release's checksums and puts it in place of
+the program, then restarts the relay if it starts with the computer. Versions
+before 0.3.5 do not have it: install 0.3.5 once with the line of the README.
 
 ### Changed
 

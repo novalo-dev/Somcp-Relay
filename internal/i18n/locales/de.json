@@ -18,7 +18,7 @@
  "ev.refused": "abgelehnt - %s",
  "ev.shop_down": "Shop nicht erreichbar - neuer Versuch in %s",
  "ev.started": "Relay gestartet",
- "help": "O'So AI Relay verbindet Ihren PrestaShop-Shop mit einer KI, die auf diesem Computer läuft.\n\nVerwendung: oso <Befehl> [Argumente] [--lang en|fr|es|de]\n\nBefehle:\n  ui                     die Oberfläche öffnen\n  pair <Shop> <Code>     einen Shop mit dem Code aus seinem Backoffice verbinden\n  ai <Adresse>           die Adresse der lokalen KI festlegen und testen\n  ai stop|start|free     Ihre lokale KI stoppen oder starten, oder Speicher freigeben\n  run                    das Relay in diesem Fenster ausführen\n  install / uninstall    mit dem Computer starten oder nicht mehr starten\n  start / stop           das Relay im Hintergrund starten oder stoppen\n  status                 Shop, KI und Relay anzeigen\n  addtopath              oso für Ihr Konto installieren und in jedem Ordner eingeben\n  remove [--keep-ai]     oso von diesem Computer entfernen (und die installierten KIs)\n  llm list               die Modelle der lokalen KI auflisten\n  llm test [Modell]      prüfen, ob ein Modell Werkzeuge aufrufen kann\n  llm install <Modell>   ein Modell in Ollama herunterladen\n  llm setup ollama|lmstudio [model]\n                         eine lokale KI und ein Modell installieren und testen\n  llm remove ollama|lmstudio\n                         eine von oso installierte KI mit ihren Modellen entfernen\n  version                die Version anzeigen\n  help                   diese Hilfe anzeigen",
+ "help": "O'So AI Relay verbindet Ihren PrestaShop-Shop mit einer KI, die auf diesem Computer läuft.\n\nVerwendung: oso <Befehl> [Argumente] [--lang en|fr|es|de]\n\nBefehle:\n  ui                     die Oberfläche öffnen\n  pair <Shop> <Code>     einen Shop mit dem Code aus seinem Backoffice verbinden\n  ai <Adresse>           die Adresse der lokalen KI festlegen und testen\n  ai stop|start|free     Ihre lokale KI stoppen oder starten, oder Speicher freigeben\n  run                    das Relay in diesem Fenster ausführen\n  install / uninstall    mit dem Computer starten oder nicht mehr starten\n  start / stop           das Relay im Hintergrund starten oder stoppen\n  status                 Shop, KI und Relay anzeigen\n  update                 die neueste Version von oso installieren\n  addtopath              oso für Ihr Konto installieren und in jedem Ordner eingeben\n  remove [--keep-ai]     oso von diesem Computer entfernen (und die installierten KIs)\n  llm list               die Modelle der lokalen KI auflisten\n  llm test [Modell]      prüfen, ob ein Modell Werkzeuge aufrufen kann\n  llm install <Modell>   ein Modell in Ollama herunterladen\n  llm setup ollama|lmstudio [model]\n                         eine lokale KI und ein Modell installieren und testen\n  llm remove ollama|lmstudio\n                         eine von oso installierte KI mit ihren Modellen entfernen\n  version                die Version anzeigen\n  help                   diese Hilfe anzeigen",
  "llm.no_model": "Kein Modell in der lokalen KI installiert.",
  "llm.progress": "%s: %d %%",
  "llm.pulled": "%s ist installiert.",
@@ -192,5 +192,9 @@
  "ui.tagline": "Der Assistent Ihres Shops, beantwortet von der KI auf diesem Computer.",
  "ui.version": "Version %s",
  "ui.working": "Wird getestet...",
+ "update.check": "Suche nach einer neuen Version...",
+ "update.done": "O'So AI Relay wurde von %s auf %s aktualisiert. Ist die Oberfläche geöffnet, schließen Sie sie und starten Sie oso ui erneut.",
+ "update.download": "O'So AI Relay %s wird heruntergeladen...",
+ "update.latest": "O'So AI Relay %s ist die neueste Version.",
  "version": "O'So AI Relay %s"
 }

@@ -106,7 +106,7 @@ func installOllama(ctx context.Context, report func(Progress)) error {
 	switch runtime.GOOS {
 	case "windows":
 		setup := filepath.Join(dir, "OllamaSetup.exe")
-		if err := download(ctx, "https://ollama.com/download/OllamaSetup.exe", setup, "Ollama", report); err != nil {
+		if err := Download(ctx, "https://ollama.com/download/OllamaSetup.exe", setup, "Ollama", report); err != nil {
 			return err
 		}
 		report(Progress{Key: "setup.install_app", Args: []any{"Ollama"}, Percent: -1})
@@ -114,7 +114,7 @@ func installOllama(ctx context.Context, report func(Progress)) error {
 		return runHidden(ctx, setup, "/VERYSILENT", "/NORESTART", "/SUPPRESSMSGBOXES")
 	case "darwin":
 		archive := filepath.Join(dir, "Ollama-darwin.zip")
-		if err := download(ctx, "https://ollama.com/download/Ollama-darwin.zip", archive, "Ollama", report); err != nil {
+		if err := Download(ctx, "https://ollama.com/download/Ollama-darwin.zip", archive, "Ollama", report); err != nil {
 			return err
 		}
 		defer os.Remove(archive)
@@ -144,14 +144,14 @@ func installOllama(ctx context.Context, report func(Progress)) error {
 		// its own: the system's zstd unpacks them. Older ones are .tgz.
 		if zstd, err := exec.LookPath("zstd"); err == nil {
 			archive := filepath.Join(dir, "ollama.tar.zst")
-			if err := download(ctx, "https://ollama.com/download/ollama-linux-"+arch+".tar.zst", archive, "Ollama", report); err == nil {
+			if err := Download(ctx, "https://ollama.com/download/ollama-linux-"+arch+".tar.zst", archive, "Ollama", report); err == nil {
 				defer os.Remove(archive)
 				report(Progress{Key: "setup.install_app", Args: []any{"Ollama"}, Percent: -1})
 				return runHidden(ctx, "sh", "-c", `"$0" -d -c "$1" | tar -xf - -C "$2"`, zstd, archive, target)
 			}
 		}
 		archive := filepath.Join(dir, "ollama.tgz")
-		if err := download(ctx, "https://ollama.com/download/ollama-linux-"+arch+".tgz", archive, "Ollama", report); err != nil {
+		if err := Download(ctx, "https://ollama.com/download/ollama-linux-"+arch+".tgz", archive, "Ollama", report); err != nil {
 			if _, missing := exec.LookPath("zstd"); missing != nil {
 				return ErrNeedsZstd
 			}
@@ -202,7 +202,7 @@ func setupLMStudio(ctx context.Context, model string, report func(Progress)) (st
 		// for this account only.
 		if runtime.GOOS == "windows" {
 			script := filepath.Join(dir, "lmstudio-install.ps1")
-			if err := download(ctx, "https://lmstudio.ai/install.ps1", script, "LM Studio", report); err != nil {
+			if err := Download(ctx, "https://lmstudio.ai/install.ps1", script, "LM Studio", report); err != nil {
 				return "", installed, err
 			}
 			defer os.Remove(script)
@@ -212,7 +212,7 @@ func setupLMStudio(ctx context.Context, model string, report func(Progress)) (st
 			}
 		} else {
 			script := filepath.Join(dir, "lmstudio-install.sh")
-			if err := download(ctx, "https://lmstudio.ai/install.sh", script, "LM Studio", report); err != nil {
+			if err := Download(ctx, "https://lmstudio.ai/install.sh", script, "LM Studio", report); err != nil {
 				return "", installed, err
 			}
 			defer os.Remove(script)
@@ -303,22 +303,35 @@ func httpsOnly(req *http.Request, via []*http.Request) error {
 	return nil
 }
 
-func download(ctx context.Context, address, path, label string, report func(Progress)) error {
+// GetHTTPS fetches an address over https only, redirects included, and
+// fails on any status but 200. The caller closes the body.
+func GetHTTPS(ctx context.Context, address string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if req.URL.Scheme != "https" {
-		return fmt.Errorf("refused %s: installers are only downloaded over https", req.URL.Redacted())
+		return nil, fmt.Errorf("refused %s: installers are only downloaded over https", req.URL.Redacted())
 	}
 	resp, err := downloadClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("%s: HTTP %d", address, resp.StatusCode)
+	}
+	return resp, nil
+}
+
+// Download saves an address to a file over https only, reporting its
+// progress under label.
+func Download(ctx context.Context, address, path, label string, report func(Progress)) error {
+	resp, err := GetHTTPS(ctx, address)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s: HTTP %d", address, resp.StatusCode)
-	}
 	out, err := os.Create(path)
 	if err != nil {
 		return err

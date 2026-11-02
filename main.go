@@ -23,6 +23,7 @@ import (
 	"github.com/novalo-dev/somcp-relay/internal/service"
 	"github.com/novalo-dev/somcp-relay/internal/shop"
 	"github.com/novalo-dev/somcp-relay/internal/ui"
+	"github.com/novalo-dev/somcp-relay/internal/update"
 )
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 		lang = cfg.Lang
 	}
 	i18n.Set(lang)
+	update.Cleanup()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -129,6 +131,30 @@ func dispatch(ctx context.Context, args []string) error {
 			return err
 		}
 		fmt.Println(i18n.T("remove.done"))
+	case "update":
+		fmt.Println(i18n.T("update.check"))
+		latest, err := update.Latest(ctx)
+		if err != nil {
+			return err
+		}
+		if !update.Newer(latest, app.Version) {
+			fmt.Println(i18n.T("update.latest", app.Version))
+			return nil
+		}
+		program, err := update.Program()
+		if err != nil {
+			return err
+		}
+		fmt.Println(i18n.T("update.download", latest))
+		if err := update.Install(ctx, program); err != nil {
+			return err
+		}
+		// A relay starting with the computer runs the old program until
+		// it is started again, from the new one.
+		if service.Installed() {
+			_ = pathenv.Restart(program)
+		}
+		fmt.Println(i18n.T("update.done", app.Version, latest))
 	case "addtopath":
 		res, err := pathenv.Add()
 		if err != nil {
