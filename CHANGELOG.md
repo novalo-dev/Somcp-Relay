@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+**Built with the latest maintained Go.** The programs were built with Go 1.22,
+which no longer receives security fixes. They are now built with the current
+stable Go, whose standard library - the part that speaks https to your shop
+and downloads the AIs - carries every published fix.
+
 ## 0.3.5 - 2026-11-02
 
 ### Added

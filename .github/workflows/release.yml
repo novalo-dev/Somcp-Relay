@@ -57,7 +57,10 @@ jobs:
       - uses: actions/setup-go@v5
         if: steps.version.outputs.publish == 'true'
         with:
-          go-version: '1.22'
+          # The latest maintained Go: the published programs carry its
+          # standard library and its security fixes. go.mod keeps 1.22 as
+          # the oldest version the code builds with.
+          go-version: stable
 
       - name: Test
         if: steps.version.outputs.publish == 'true'
